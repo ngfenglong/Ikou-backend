@@ -53,7 +53,7 @@ func (app *application) serve() error {
 		WriteTimeout:      5 * time.Second,
 	}
 
-	app.infoLog.Println(fmt.Sprintf("Backend is listening on port %d", app.config.port))
+	app.infoLog.Print(fmt.Sprintf("Backend is listening on port %d", app.config.port))
 
 	return srv.ListenAndServe()
 }
