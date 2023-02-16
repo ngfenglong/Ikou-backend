@@ -1,0 +1,16 @@
+*.exe
+*.exe~
+*.orig
+.*.swp
+.DS_Store
+Thumbs.db
+.editorconfig
+/build/
+/cli/winresources/versioninfo.json
+/cli/winresources/*.syso
+profile.out
+/dist/
+
+# top-level go.mod is not meant to be checked in
+/go.mod
+/go.sum
