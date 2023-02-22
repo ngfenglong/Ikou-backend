@@ -9,6 +9,8 @@ Thumbs.db
 /cli/winresources/versioninfo.json
 /cli/winresources/*.syso
 profile.out
+
+/data-seeding/
 /dist/
 
 # top-level go.mod is not meant to be checked in
