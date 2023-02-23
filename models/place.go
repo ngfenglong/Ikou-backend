@@ -11,7 +11,7 @@ type DBModel struct {
 }
 
 type Place struct {
-	ID              int       `json:"id"`
+	ID              string    `json:"id"`
 	Name            string    `json:"placeName"`
 	Description     string    `json:"description"`
 	Address         string    `json:"address"`
@@ -24,7 +24,7 @@ type Place struct {
 	CreatedBy       string    `json:"created_by"`
 }
 
-func (m *DBModel) GetPlaceById(id int) (Place, error) {
+func (m *DBModel) GetPlaceById(id string) (Place, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
@@ -32,7 +32,7 @@ func (m *DBModel) GetPlaceById(id int) (Place, error) {
 
 	row := m.DB.QueryRowContext(ctx, `
 		SELECT 
-			id, name, description,address, lat, lon, image_url, 
+			id, placename, description,address, lat, lon, image_url, 
 			subcategorycode, created_at, updated_at, created_by
 		FROM 
 			places
