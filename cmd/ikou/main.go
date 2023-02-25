@@ -2,13 +2,14 @@ package main
 
 import (
 	"database/sql"
-	"flag"
 	"fmt"
-	"ikou/models"
 	"log"
 	"net/http"
 	"os"
 	"time"
+
+	"ikou/internal/util"
+	"ikou/models"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -16,30 +17,23 @@ import (
 const version = "1.0.0"
 
 type application struct {
-	config   config
+	config   util.Config
 	infoLog  *log.Logger
 	errorLog *log.Logger
 	version  string
 	DB       models.DBModel
 }
 
-type config struct {
-	port     int
-	frontend string
-	db       struct {
-		dsn string
-	}
-}
-
 func main() {
-	var cfg config
-	flag.IntVar(&cfg.port, "port", 5000, "Server port to listen on")
-	flag.StringVar(&cfg.db.dsn, "dsn", "", "DSN")
-
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
 	errorLog := log.New(os.Stdout, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
-	conn, err := OpenDB(cfg.db.dsn)
+	cfg, err := util.LoadConfig(".")
+	if err != nil {
+		errorLog.Fatal(err)
+	}
+
+	conn, err := OpenDB(cfg.DbSource)
 	if err != nil {
 		errorLog.Fatal(err)
 	}
@@ -61,7 +55,7 @@ func main() {
 
 func (app *application) serve() error {
 	srv := &http.Server{
-		Addr:              fmt.Sprintf(":%d", app.config.port),
+		Addr:              fmt.Sprintf(":%d", app.config.Port),
 		Handler:           app.routes(),
 		IdleTimeout:       30 * time.Second,
 		ReadTimeout:       10 * time.Second,
@@ -69,7 +63,7 @@ func (app *application) serve() error {
 		WriteTimeout:      5 * time.Second,
 	}
 
-	app.infoLog.Print(fmt.Sprintf("Backend is listening on port %d", app.config.port))
+	app.infoLog.Print(fmt.Sprintf("Backend is listening on port %d", app.config.Port))
 
 	return srv.ListenAndServe()
 }

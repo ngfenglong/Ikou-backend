@@ -6,7 +6,7 @@ import (
 )
 
 func (app *application) GetRecommenedPlaces(w http.ResponseWriter, r *http.Request) {
-	place, err := app.DB.GetPlaceById("")
+	place, err := app.DB.GetPlaceById("26524f97-b2c1-11ed-ae52-0a0027000007")
 
 	if err != nil {
 		app.errorLog.Println(err)
