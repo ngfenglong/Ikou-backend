@@ -18,7 +18,9 @@ func (app *application) routes() http.Handler {
 		MaxAge:           300,
 	}))
 
-	mux.Get("/api/getRecommendedPlaces", app.GetRecommenedPlaces)
+	mux.Get("/api/places", app.GetAllPlaces)
+	mux.Get("/api/getPlaceById/{id}", app.GetPlaceById)
+	mux.Get("/api/getPlacesBySubCategory/{code}", app.GetPlacesBySubCategoryCode)
 
 	return mux
 }
