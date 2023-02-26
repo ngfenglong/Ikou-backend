@@ -97,6 +97,11 @@ func (app *application) GetAllSubCategories(w http.ResponseWriter, r *http.Reque
 func (app *application) GetSubCategoriesByCategory(w http.ResponseWriter, r *http.Request) {
 	code := chi.URLParam(r, "code")
 	categoryCode, err := strconv.Atoi(code)
+	if err != nil {
+		app.errorLog.Println(err)
+		return
+	}
+
 	subCategories, err := app.DB.GetAllSubCategoryByCategoryCode(categoryCode)
 	if err != nil {
 		app.errorLog.Println(err)
