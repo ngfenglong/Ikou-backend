@@ -21,6 +21,9 @@ func (app *application) routes() http.Handler {
 	mux.Get("/api/places", app.GetAllPlaces)
 	mux.Get("/api/getPlaceById/{id}", app.GetPlaceById)
 	mux.Get("/api/getPlacesBySubCategory/{code}", app.GetPlacesBySubCategoryCode)
+	mux.Get("/api/codeDecodeCategories", app.GetAllCategories)
+	mux.Get("/api/codeDecodeSubCategories", app.GetAllSubCategories)
+	mux.Get("/api/codeDecodeSubCategories/{code}", app.GetSubCategoriesByCategory)
 
 	return mux
 }
