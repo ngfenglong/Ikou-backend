@@ -5,7 +5,7 @@ hello:
 
 build:
 	@echo Building...
-	@go build -o dist/api.exe ./${SHELL}/ikou
+	@go build -o dist/api.exe ./${SHELL}
 	@echo Backend built!
 
 start: build

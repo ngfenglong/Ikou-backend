@@ -1,19 +1,10 @@
-package models
+package repository
 
 import (
 	"context"
+	. "ikou/api/models"
 	"time"
 )
-
-type Activity struct {
-	ID          string    `json:"id"`
-	ActvityName string    `json:"activityName"`
-	Duration    int       `json:"duration"`
-	Place       Place     `json:"place"`
-	CreatedAt   time.Time `json:"-"`
-	UpdatedAt   time.Time `json:"updated_at"`
-	CreatedBy   string    `json:"created_by"`
-}
 
 func (m *DBModel) GetActivityByPlace(placeId string) ([]*Activity, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)

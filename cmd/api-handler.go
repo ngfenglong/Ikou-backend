@@ -9,7 +9,7 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-func (app *application) GetAllPlaces(w http.ResponseWriter, r *http.Request) {
+func (app *Application) GetAllPlaces(w http.ResponseWriter, r *http.Request) {
 	places, err := app.DB.GetAllPlaces()
 	if err != nil {
 		// ToDo: do some proper error handling here
@@ -25,7 +25,7 @@ func (app *application) GetAllPlaces(w http.ResponseWriter, r *http.Request) {
 }
 
 // Get place with details such as comments, liked, etc...
-func (app *application) GetPlaceById(w http.ResponseWriter, r *http.Request) {
+func (app *Application) GetPlaceById(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	place, err := app.DB.GetPlaceById(id)
 
@@ -45,7 +45,7 @@ func (app *application) GetPlaceById(w http.ResponseWriter, r *http.Request) {
 	w.Write(out)
 }
 
-func (app *application) GetPlacesBySubCategoryCode(w http.ResponseWriter, r *http.Request) {
+func (app *Application) GetPlacesBySubCategoryCode(w http.ResponseWriter, r *http.Request) {
 	code := chi.URLParam(r, "code")
 	subCategoryCode, err := strconv.Atoi(code)
 	if err != nil {
@@ -66,7 +66,7 @@ func (app *application) GetPlacesBySubCategoryCode(w http.ResponseWriter, r *htt
 	}
 }
 
-func (app *application) GetAllCategories(w http.ResponseWriter, r *http.Request) {
+func (app *Application) GetAllCategories(w http.ResponseWriter, r *http.Request) {
 	categories, err := app.DB.GetAllCategory()
 	if err != nil {
 		app.errorLog.Println(err)
@@ -80,7 +80,7 @@ func (app *application) GetAllCategories(w http.ResponseWriter, r *http.Request)
 	}
 }
 
-func (app *application) GetAllSubCategories(w http.ResponseWriter, r *http.Request) {
+func (app *Application) GetAllSubCategories(w http.ResponseWriter, r *http.Request) {
 	subCategories, err := app.DB.GetAllSubCategory()
 	if err != nil {
 		app.errorLog.Println(err)
@@ -94,7 +94,7 @@ func (app *application) GetAllSubCategories(w http.ResponseWriter, r *http.Reque
 	}
 }
 
-func (app *application) GetSubCategoriesByCategory(w http.ResponseWriter, r *http.Request) {
+func (app *Application) GetSubCategoriesByCategory(w http.ResponseWriter, r *http.Request) {
 	code := chi.URLParam(r, "code")
 	categoryCode, err := strconv.Atoi(code)
 	if err != nil {

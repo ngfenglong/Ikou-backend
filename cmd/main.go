@@ -8,27 +8,27 @@ import (
 	"os"
 	"time"
 
-	"ikou/internal/util"
-	"ikou/models"
+	"ikou/api/config"
+	repository "ikou/api/repositories"
 
 	_ "github.com/go-sql-driver/mysql"
 )
 
 const version = "1.0.0"
 
-type application struct {
-	config   util.Config
+type Application struct {
+	config   config.Config
 	infoLog  *log.Logger
 	errorLog *log.Logger
 	version  string
-	DB       models.DBModel
+	DB       repository.DBModel
 }
 
 func main() {
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
 	errorLog := log.New(os.Stdout, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
-	cfg, err := util.LoadConfig(".")
+	cfg, err := config.LoadConfig(".")
 	if err != nil {
 		errorLog.Fatal(err)
 	}
@@ -38,12 +38,12 @@ func main() {
 		errorLog.Fatal(err)
 	}
 
-	app := &application{
+	app := &Application{
 		config:   cfg,
 		infoLog:  infoLog,
 		errorLog: errorLog,
 		version:  version,
-		DB:       models.DBModel{DB: conn},
+		DB:       repository.DBModel{DB: conn},
 	}
 	defer conn.Close()
 
@@ -53,7 +53,7 @@ func main() {
 	}
 }
 
-func (app *application) serve() error {
+func (app *Application) serve() error {
 	srv := &http.Server{
 		Addr:              fmt.Sprintf(":%d", app.config.Port),
 		Handler:           app.routes(),
