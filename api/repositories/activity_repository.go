@@ -13,10 +13,10 @@ func (m *DBModel) GetActivityByPlace(placeId string) ([]*Activity, error) {
 	var activities []*Activity
 
 	query := `
-		SELECT a.id, a.activityname, a.hourDuration, a.created_at, a.updated_at, a.created_by, p.id, p.placeName, p.description, p.address, p.address, p.lat, p.lon, p.image_url, p.subCategoryCode
+		SELECT a.id, a.activityname, a.hourDuration, a.created_at, a.updated_at, a.created_by, p.id, p.placeName, p.description, p.address, p.address, p.lat, p.lon, p.image_url, s.decode
 		FROM Activities a 
-		INNER JOIN Place p
-		ON p.id = a.placeId
+		INNER JOIN Place p ON p.id = a.placeId
+		Inner join CodedecodeSubcategories s on s.code = p.subCategoryCode
 		WHERE placeId = ? 
 	`
 	rows, err := m.DB.QueryContext(ctx, query)
@@ -43,7 +43,7 @@ func (m *DBModel) GetActivityByPlace(placeId string) ([]*Activity, error) {
 			&a.Place.Lat,
 			&a.Place.Lon,
 			&a.Place.ImageUrl,
-			&a.Place.SubCategoryCode,
+			&a.Place.SubCategory,
 		)
 		if err != nil {
 			return nil, err

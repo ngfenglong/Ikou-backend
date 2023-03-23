@@ -19,8 +19,13 @@ func (m *DBModel) GetAllPlaces() ([]*Place, error) {
 	var places []*Place
 
 	query := `
-		SELECT id, placeName, description, address, lat, lon, image_url, subCategoryCode, created_at, updated_at, created_by
-		FROM Places 
+	SELECT 
+		p.id, p.placename, p.description, p.address, p.lat, p.lon, p.imageUrl, p.averageSpending, 
+		s.decode, c.decode, p.created_at, p.updated_at, p.created_by
+	FROM 
+		places p
+		Inner Join CodedecodeSubcategories s on s.code = p.subCategoryCode
+		Inner Join codedecodeCategories c on c.code = s.categorycode
 	`
 
 	rows, err := m.DB.QueryContext(ctx, query)
@@ -40,7 +45,9 @@ func (m *DBModel) GetAllPlaces() ([]*Place, error) {
 			&p.Lat,
 			&p.Lon,
 			&p.ImageUrl,
-			&p.SubCategoryCode,
+			&p.AverageSpending,
+			&p.SubCategory,
+			&p.Category,
 			&p.CreatedAt,
 			&p.UpdatedAt,
 			&p.CreatedBy,
@@ -62,12 +69,14 @@ func (m *DBModel) GetPlaceById(id string) (Place, error) {
 
 	row := m.DB.QueryRowContext(ctx, `
 		SELECT 
-			id, placename, description,address, lat, lon, image_url, 
-			subcategorycode, created_at, updated_at, created_by
+			p.id, p.placename, p.description, p.address, p.lat, p.lon, p.imageUrl, p.averageSpending, 
+			s.decode, c.decode, p.created_at, p.updated_at, p.created_by
 		FROM 
-			places
+			places p
+			Inner Join CodedecodeSubcategories s on s.code = p.subCategoryCode
+			Inner Join codedecodeCategories c on c.code = s.categorycode
 		WHERE 
-			id = ?`, id)
+			p.id = ?`, id)
 
 	err := row.Scan(
 		&place.ID,
@@ -77,7 +86,9 @@ func (m *DBModel) GetPlaceById(id string) (Place, error) {
 		&place.Lat,
 		&place.Lon,
 		&place.ImageUrl,
-		&place.SubCategoryCode,
+		&place.AverageSpending,
+		&place.SubCategory,
+		&place.Category,
 		&place.CreatedAt,
 		&place.UpdatedAt,
 		&place.CreatedBy,
@@ -98,8 +109,11 @@ func (m *DBModel) GetPlacesBySubCategoryCode(code int) ([]*Place, error) {
 	var places []*Place
 
 	query := `
-		SELECT id, placeName, description, address, lat, lon, image_url, subCategoryCode, created_at, updated_at, created_by
+		SELECT 
+			p.id, p.placename, p.description, p.address, p.lat, p.lon, p.imageUrl, p.averageSpending, 
+			s.decode, p.created_at, p.updated_at, p.created_by
 		FROM Places 
+		Inner Join CodedecodeSubcategories s on s.code = p.subCategoryCode
 		WHERE subCategoryCode = ?
 	`
 
@@ -121,7 +135,8 @@ func (m *DBModel) GetPlacesBySubCategoryCode(code int) ([]*Place, error) {
 			&p.Lat,
 			&p.Lon,
 			&p.ImageUrl,
-			&p.SubCategoryCode,
+			&p.AverageSpending,
+			&p.SubCategory,
 			&p.CreatedAt,
 			&p.UpdatedAt,
 			&p.CreatedBy,

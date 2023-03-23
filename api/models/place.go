@@ -11,8 +11,10 @@ type Place struct {
 	Address         string    `json:"address"`
 	Lat             string    `json:"lat"`
 	Lon             string    `json:"lon"`
+	AverageSpending int       `json:"average_spending"`
 	ImageUrl        string    `json:"image_url"`
-	SubCategoryCode int       `json:"subcategorycode"`
+	SubCategory     string    `json:"sub_category"`
+	Category        string    `json:"category"`
 	CreatedAt       time.Time `json:"-"`
 	UpdatedAt       time.Time `json:"updated_at"`
 	CreatedBy       string    `json:"created_by"`
