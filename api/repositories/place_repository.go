@@ -99,6 +99,41 @@ func (m *DBModel) GetPlaceById(id string) (Place, error) {
 		return place, err
 	}
 
+	query := `
+		select 
+			id, rating, reviewDescription, created_at, updated_at, created_by
+		from 
+			reviews
+		where
+			place_id = ?
+	`
+
+	rows, err := m.DB.QueryContext(ctx, query, id)
+	if err != nil {
+		return place, err
+	}
+
+	defer rows.Close()
+	var reviews []*Review
+
+	for rows.Next() {
+		var r Review
+		err = rows.Scan(
+			&r.ID,
+			&r.Rating,
+			&r.ReviewDescription,
+			&r.CreatedAt,
+			&r.UpdatedAt,
+			&r.CreatedBy,
+		)
+		if err != nil {
+			return place, err
+		}
+		reviews = append(reviews, &r)
+	}
+
+	place.Reviews = reviews
+
 	return place, nil
 }
 

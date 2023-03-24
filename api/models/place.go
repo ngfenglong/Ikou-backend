@@ -15,6 +15,7 @@ type Place struct {
 	ImageUrl        string    `json:"image_url"`
 	SubCategory     string    `json:"sub_category"`
 	Category        string    `json:"category"`
+	Reviews         []*Review `json:"reviews"`
 	CreatedAt       time.Time `json:"-"`
 	UpdatedAt       time.Time `json:"updated_at"`
 	CreatedBy       string    `json:"created_by"`
