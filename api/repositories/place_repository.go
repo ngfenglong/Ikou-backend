@@ -101,9 +101,11 @@ func (m *DBModel) GetPlaceById(id string) (Place, error) {
 
 	query := `
 		select 
-			id, rating, reviewDescription, created_at, updated_at, created_by
+			r.id, r.rating, r.reviewDescription, u.profileImage, r.created_at, r.updated_at, u.username
 		from 
-			reviews
+			reviews r
+		inner join 
+			users u on u.id = r.created_by
 		where
 			place_id = ?
 	`
@@ -122,6 +124,7 @@ func (m *DBModel) GetPlaceById(id string) (Place, error) {
 			&r.ID,
 			&r.Rating,
 			&r.ReviewDescription,
+			&r.ReviewerProfileImage,
 			&r.CreatedAt,
 			&r.UpdatedAt,
 			&r.CreatedBy,
@@ -132,7 +135,11 @@ func (m *DBModel) GetPlaceById(id string) (Place, error) {
 		reviews = append(reviews, &r)
 	}
 
-	place.Reviews = reviews
+	if len(reviews) == 0 {
+		place.Reviews = []*Review{}
+	} else {
+		place.Reviews = reviews
+	}
 
 	return place, nil
 }
