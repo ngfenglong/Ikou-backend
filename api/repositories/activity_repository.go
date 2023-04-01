@@ -2,15 +2,15 @@ package repository
 
 import (
 	"context"
-	. "ikou/api/models"
+	"ikou/api/models"
 	"time"
 )
 
-func (m *DBModel) GetActivityByPlace(placeId string) ([]*Activity, error) {
+func (m *DBModel) GetActivityByPlace(placeId string) ([]*models.Activity, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	var activities []*Activity
+	var activities []*models.Activity
 
 	query := `
 		SELECT a.id, a.activityname, a.hourDuration, a.created_at, a.updated_at, a.created_by, p.id, p.placeName, p.description, p.address, p.address, p.lat, p.lon, p.image_url, s.decode
@@ -27,7 +27,7 @@ func (m *DBModel) GetActivityByPlace(placeId string) ([]*Activity, error) {
 	defer rows.Close()
 
 	for rows.Next() {
-		var a Activity
+		var a models.Activity
 		err = rows.Scan(
 			&a.ID,
 			&a.ActvityName,

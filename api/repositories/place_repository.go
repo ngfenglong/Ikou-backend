@@ -2,21 +2,16 @@ package repository
 
 import (
 	"context"
-	"database/sql"
-	. "ikou/api/models"
+	"ikou/api/models"
 	"time"
 )
 
-type DBModel struct {
-	DB *sql.DB
-}
-
 // #region Place API
-func (m *DBModel) GetAllPlaces() ([]*Place, error) {
+func (m *DBModel) GetAllPlaces() ([]*models.Place, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	var places []*Place
+	var places []*models.Place
 
 	query := `
 	SELECT 
@@ -36,7 +31,7 @@ func (m *DBModel) GetAllPlaces() ([]*Place, error) {
 	defer rows.Close()
 
 	for rows.Next() {
-		var p Place
+		var p models.Place
 		err = rows.Scan(
 			&p.ID,
 			&p.Name,
@@ -61,11 +56,11 @@ func (m *DBModel) GetAllPlaces() ([]*Place, error) {
 	return places, nil
 }
 
-func (m *DBModel) GetPlaceById(id string) (Place, error) {
+func (m *DBModel) GetPlaceById(id string) (models.Place, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	var place Place
+	var place models.Place
 
 	row := m.DB.QueryRowContext(ctx, `
 		SELECT 
@@ -116,10 +111,10 @@ func (m *DBModel) GetPlaceById(id string) (Place, error) {
 	}
 
 	defer rows.Close()
-	var reviews []*Review
+	var reviews []*models.Review
 
 	for rows.Next() {
-		var r Review
+		var r models.Review
 		err = rows.Scan(
 			&r.ID,
 			&r.Rating,
@@ -136,7 +131,7 @@ func (m *DBModel) GetPlaceById(id string) (Place, error) {
 	}
 
 	if len(reviews) == 0 {
-		place.Reviews = []*Review{}
+		place.Reviews = []*models.Review{}
 	} else {
 		place.Reviews = reviews
 	}
@@ -144,17 +139,17 @@ func (m *DBModel) GetPlaceById(id string) (Place, error) {
 	return place, nil
 }
 
-func (m *DBModel) GetPlacesBySubCategoryCode(code int) ([]*Place, error) {
+func (m *DBModel) GetPlacesBySubCategoryCode(code int) ([]*models.Place, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	var places []*Place
+	var places []*models.Place
 
 	query := `
 		SELECT 
 			p.id, p.placename, p.description, p.address, p.lat, p.lon, p.imageUrl, p.averageSpending, 
 			s.decode, p.created_at, p.updated_at, p.created_by
-		FROM Places 
+		FROM Places p
 		Inner Join CodedecodeSubcategories s on s.code = p.subCategoryCode
 		WHERE subCategoryCode = ?
 	`
@@ -168,7 +163,7 @@ func (m *DBModel) GetPlacesBySubCategoryCode(code int) ([]*Place, error) {
 	defer rows.Close()
 
 	for rows.Next() {
-		var p Place
+		var p models.Place
 		err = rows.Scan(
 			&p.ID,
 			&p.Name,

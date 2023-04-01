@@ -4,14 +4,14 @@ import (
 	"context"
 	"time"
 
-	. "ikou/api/models"
+	"ikou/api/models"
 )
 
-func (m *DBModel) GetAllCategory() ([]*CodeDecodeCategory, error) {
+func (m *DBModel) GetAllCategory() ([]*models.CodeDecodeCategory, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	var categories []*CodeDecodeCategory
+	var categories []*models.CodeDecodeCategory
 
 	query := `
 		Select id, code, decode, isActive, created_at, updated_at 
@@ -26,7 +26,7 @@ func (m *DBModel) GetAllCategory() ([]*CodeDecodeCategory, error) {
 	defer rows.Close()
 
 	for rows.Next() {
-		var c CodeDecodeCategory
+		var c models.CodeDecodeCategory
 		err = rows.Scan(
 			&c.ID,
 			&c.Code,
@@ -46,11 +46,11 @@ func (m *DBModel) GetAllCategory() ([]*CodeDecodeCategory, error) {
 	return categories, nil
 }
 
-func (m *DBModel) GetAllSubCategory() ([]*CodeDecodeSubCategory, error) {
+func (m *DBModel) GetAllSubCategory() ([]*models.CodeDecodeSubCategory, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	var subCategories []*CodeDecodeSubCategory
+	var subCategories []*models.CodeDecodeSubCategory
 
 	query := `
 		Select id, code, decode, isActive, categoryCode, created_at, updated_at 
@@ -65,7 +65,7 @@ func (m *DBModel) GetAllSubCategory() ([]*CodeDecodeSubCategory, error) {
 	defer rows.Close()
 
 	for rows.Next() {
-		var c CodeDecodeSubCategory
+		var c models.CodeDecodeSubCategory
 		err = rows.Scan(
 			&c.ID,
 			&c.Code,
@@ -86,11 +86,11 @@ func (m *DBModel) GetAllSubCategory() ([]*CodeDecodeSubCategory, error) {
 	return subCategories, nil
 }
 
-func (m *DBModel) GetAllSubCategoryByCategoryCode(categoryCode int) ([]*CodeDecodeSubCategory, error) {
+func (m *DBModel) GetAllSubCategoryByCategoryCode(categoryCode int) ([]*models.CodeDecodeSubCategory, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	var subCategories []*CodeDecodeSubCategory
+	var subCategories []*models.CodeDecodeSubCategory
 
 	query := `
 		Select id, code, decode, isActive, categoryCode, created_at, updated_at 
@@ -106,7 +106,7 @@ func (m *DBModel) GetAllSubCategoryByCategoryCode(categoryCode int) ([]*CodeDeco
 	defer rows.Close()
 
 	for rows.Next() {
-		var c CodeDecodeSubCategory
+		var c models.CodeDecodeSubCategory
 		err = rows.Scan(
 			&c.ID,
 			&c.Code,

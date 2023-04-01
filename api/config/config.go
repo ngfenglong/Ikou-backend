@@ -1,8 +1,6 @@
 package config
 
 import (
-	"log"
-
 	"github.com/spf13/viper"
 )
 
@@ -14,7 +12,9 @@ type Config struct {
 	ServerAddress   string `mapstructure:"SERVER_ADDRESS"`
 }
 
-func LoadConfig(path string) (config Config, err error) {
+var C *Config
+
+func LoadConfig(path string) error {
 	viper.AddConfigPath(path)
 
 	viper.SetConfigName("app")
@@ -22,11 +22,11 @@ func LoadConfig(path string) (config Config, err error) {
 	viper.SetConfigType("env")
 
 	if err := viper.ReadInConfig(); err != nil {
-		log.Fatal("Error reading env file", err)
+		return err
 	}
 
-	if err := viper.Unmarshal(&config); err != nil {
-		log.Fatal(err)
+	if err := viper.Unmarshal(&C); err != nil {
+		return err
 	}
-	return
+	return nil
 }
