@@ -1,11 +1,12 @@
 package controllers
 
 import (
-	"ikou/api/store"
-	"ikou/internal/helper"
 	"log"
 	"net/http"
 	"strconv"
+
+	"github.com/ngfenglong/ikou-backend/api/store"
+	"github.com/ngfenglong/ikou-backend/internal/helper"
 
 	"github.com/go-chi/chi/v5"
 )

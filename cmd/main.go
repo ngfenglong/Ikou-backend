@@ -1,11 +1,12 @@
 package main
 
 import (
-	"ikou/api"
-	"ikou/api/config"
-	"ikou/api/store"
 	"log"
 	"os"
+
+	"github.com/ngfenglong/ikou-backend/api"
+	"github.com/ngfenglong/ikou-backend/api/config"
+	"github.com/ngfenglong/ikou-backend/api/store"
 
 	_ "github.com/go-sql-driver/mysql"
 )

@@ -1,6 +1,6 @@
 package controllers
 
-import "ikou/api/store"
+import "github.com/ngfenglong/ikou-backend/api/store"
 
 type AuthController struct {
 	store *store.Store

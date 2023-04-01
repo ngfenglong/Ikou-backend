@@ -2,8 +2,9 @@ package repository
 
 import (
 	"context"
-	"ikou/api/models"
 	"time"
+
+	"github.com/ngfenglong/ikou-backend/api/models"
 )
 
 func (m *DBModel) GetActivityByPlace(placeId string) ([]*models.Activity, error) {

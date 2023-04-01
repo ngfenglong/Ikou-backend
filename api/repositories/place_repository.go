@@ -2,7 +2,7 @@ package repository
 
 import (
 	"context"
-	"ikou/api/models"
+	"github.com/ngfenglong/ikou-backend/api/models"
 	"time"
 )
 

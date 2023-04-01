@@ -1,8 +1,8 @@
 package store
 
 import (
-	"ikou/api/config"
-	repository "ikou/api/repositories"
+	"github.com/ngfenglong/ikou-backend/api/config"
+	repository "github.com/ngfenglong/ikou-backend/api/repositories"
 )
 
 type Store struct {

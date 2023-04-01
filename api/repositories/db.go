@@ -3,7 +3,7 @@ package repository
 import (
 	"database/sql"
 	"fmt"
-	"ikou/api/config"
+	"github.com/ngfenglong/ikou-backend/api/config"
 )
 
 func NewDBModel(cfg config.Config) (*DBModel, error) {

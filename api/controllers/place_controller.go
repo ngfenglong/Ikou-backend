@@ -2,8 +2,8 @@ package controllers
 
 import (
 	"encoding/json"
-	"ikou/api/store"
-	"ikou/internal/helper"
+	"github.com/ngfenglong/ikou-backend/api/store"
+	"github.com/ngfenglong/ikou-backend/internal/helper"
 	"log"
 	"net/http"
 	"strconv"

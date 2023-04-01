@@ -9,10 +9,10 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
 
-	"ikou/api/config"
-	"ikou/api/controllers"
-	"ikou/api/routes"
-	"ikou/api/store"
+	"github.com/ngfenglong/ikou-backend/api/config"
+	"github.com/ngfenglong/ikou-backend/api/controllers"
+	"github.com/ngfenglong/ikou-backend/api/routes"
+	"github.com/ngfenglong/ikou-backend/api/store"
 )
 
 type Application struct {

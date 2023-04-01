@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"ikou/api/models"
+	"github.com/ngfenglong/ikou-backend/api/models"
 )
 
 func (m *DBModel) GetAllCategory() ([]*models.CodeDecodeCategory, error) {

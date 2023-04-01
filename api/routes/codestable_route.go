@@ -1,8 +1,8 @@
 package routes
 
 import (
-	"ikou/api/controllers"
-	"ikou/api/store"
+	"github.com/ngfenglong/ikou-backend/api/controllers"
+	"github.com/ngfenglong/ikou-backend/api/store"
 
 	"github.com/go-chi/chi/v5"
 )
