@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 
@@ -22,6 +23,8 @@ func main() {
 	}
 
 	dataStore, err := store.NewStore(*config.C)
+	databaseURL := os.Getenv("DB_SOURCE")
+	fmt.Println("Using database URL:", databaseURL)
 	if err != nil {
 		errorLog.Fatal(err)
 	}
