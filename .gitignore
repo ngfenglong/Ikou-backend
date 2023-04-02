@@ -14,7 +14,3 @@ profile.out
 /dist/
 
 *.env
-
-# top-level go.mod is not meant to be checked in
-/go.mod
-/go.sum
