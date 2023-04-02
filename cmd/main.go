@@ -30,6 +30,8 @@ func main() {
 		fmt.Println(envVar)
 	}
 
+	fmt.Println("Using database source:", config.C.DbSource)
+
 	if err != nil {
 		errorLog.Fatal(err)
 	}
