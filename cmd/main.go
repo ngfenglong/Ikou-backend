@@ -23,8 +23,13 @@ func main() {
 	}
 
 	dataStore, err := store.NewStore(*config.C)
-	databaseURL := os.Getenv("DB_SOURCE")
-	fmt.Println("Using database URL:", databaseURL)
+	envVars := os.Environ()
+
+	fmt.Println("Environment variables:")
+	for _, envVar := range envVars {
+		fmt.Println(envVar)
+	}
+
 	if err != nil {
 		errorLog.Fatal(err)
 	}
