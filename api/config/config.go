@@ -21,6 +21,8 @@ func LoadConfig(path string) error {
 
 	viper.SetConfigType("env")
 
+	viper.AutomaticEnv()
+
 	if err := viper.ReadInConfig(); err != nil {
 		return err
 	}

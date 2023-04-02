@@ -13,4 +13,4 @@ profile.out
 /data-seeding/
 /dist/
 
-*.env
+prod.env
