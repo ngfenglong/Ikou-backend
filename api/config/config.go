@@ -1,6 +1,8 @@
 package config
 
 import (
+	"fmt"
+
 	"github.com/spf13/viper"
 )
 
@@ -30,5 +32,11 @@ func LoadConfig(path string) error {
 	if err := viper.Unmarshal(&C); err != nil {
 		return err
 	}
+	fmt.Println("Port:", C.Port)
+	fmt.Println("Frontend Address:", C.FrontendAddress)
+	fmt.Println("DB Driver:", C.DbDriver)
+	fmt.Println("DB Source:", C.DbSource)
+	fmt.Println("Server Address:", C.ServerAddress)
+
 	return nil
 }
