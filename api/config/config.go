@@ -14,12 +14,8 @@ type Config struct {
 
 var C *Config
 
-func LoadConfig(path string) error {
-	viper.AddConfigPath(path)
-
-	viper.SetConfigName("app")
-
-	viper.SetConfigType("env")
+func LoadConfig() error {
+	viper.AutomaticEnv()
 
 	if err := viper.ReadInConfig(); err != nil {
 		return err

@@ -16,7 +16,7 @@ const version = "1.0.0"
 func main() {
 	errorLog := log.New(os.Stdout, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
-	err := config.LoadConfig(".")
+	err := config.LoadConfig()
 	if err != nil {
 		errorLog.Fatal(err)
 	}
