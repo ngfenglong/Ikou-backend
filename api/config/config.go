@@ -17,10 +17,6 @@ var C *Config
 func LoadConfig() error {
 	viper.AutomaticEnv()
 
-	if err := viper.ReadInConfig(); err != nil {
-		return err
-	}
-
 	if err := viper.Unmarshal(&C); err != nil {
 		return err
 	}
