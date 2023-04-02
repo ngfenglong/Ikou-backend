@@ -2,8 +2,9 @@ package repository
 
 import (
 	"context"
-	"github.com/ngfenglong/ikou-backend/api/models"
 	"time"
+
+	"github.com/ngfenglong/ikou-backend/api/models"
 )
 
 // #region Place API
@@ -18,9 +19,9 @@ func (m *DBModel) GetAllPlaces() ([]*models.Place, error) {
 		p.id, p.placename, p.description, p.address, p.lat, p.lon, p.imageUrl, p.averageSpending, 
 		s.decode, c.decode, p.created_at, p.updated_at, p.created_by
 	FROM 
-		places p
+		Places p
 		Inner Join CodedecodeSubcategories s on s.code = p.subCategoryCode
-		Inner Join codedecodeCategories c on c.code = s.categorycode
+		Inner Join CodedecodeCategories c on c.code = s.categorycode
 	`
 
 	rows, err := m.DB.QueryContext(ctx, query)
@@ -67,9 +68,9 @@ func (m *DBModel) GetPlaceById(id string) (models.Place, error) {
 			p.id, p.placename, p.description, p.address, p.lat, p.lon, p.imageUrl, p.averageSpending, 
 			s.decode, c.decode, p.created_at, p.updated_at, p.created_by
 		FROM 
-			places p
+			Places p
 			Inner Join CodedecodeSubcategories s on s.code = p.subCategoryCode
-			Inner Join codedecodeCategories c on c.code = s.categorycode
+			Inner Join CodedecodeCategories c on c.code = s.categorycode
 		WHERE 
 			p.id = ?`, id)
 
@@ -98,9 +99,9 @@ func (m *DBModel) GetPlaceById(id string) (models.Place, error) {
 		select 
 			r.id, r.rating, r.reviewDescription, u.profileImage, r.created_at, r.updated_at, u.username
 		from 
-			reviews r
+			Reviews r
 		inner join 
-			users u on u.id = r.created_by
+			Users u on u.id = r.created_by
 		where
 			place_id = ?
 	`
