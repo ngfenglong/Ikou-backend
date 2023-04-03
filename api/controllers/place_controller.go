@@ -27,7 +27,7 @@ func (pc *PlaceController) GetAllPlaces(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	err = helper.WriteJSON(w, http.StatusOK, places)
+	err = helper.WriteJSONResponse(w, http.StatusOK, places)
 	if err != nil {
 		log.Fatalf("Failed to convert to json: %v", err)
 		return
@@ -69,7 +69,7 @@ func (pc *PlaceController) GetPlacesBySubCategoryCode(w http.ResponseWriter, r *
 		return
 	}
 
-	err = helper.WriteJSON(w, http.StatusOK, places)
+	err = helper.WriteJSONResponse(w, http.StatusOK, places)
 	if err != nil {
 		log.Fatalf("Failed to convert to json: %v", err)
 		return
