@@ -69,7 +69,7 @@ func BadRequest(w http.ResponseWriter, r *http.Request, err error) error {
 	return nil
 }
 
-func invalidCredential(w http.ResponseWriter) error {
+func InvalidCredential(w http.ResponseWriter) error {
 	var payload struct {
 		Error   bool   `json:"error"`
 		Message string `json:"message"`
@@ -86,13 +86,14 @@ func invalidCredential(w http.ResponseWriter) error {
 	return nil
 }
 
-func passwordMatches(hash, password string) (bool, error) {
+func PasswordMatches(hash, password string) (bool, error) {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+
 	if err != nil {
 		switch {
 		case errors.Is(err, bcrypt.ErrMismatchedHashAndPassword):
 			return false, nil
-		default: 
+		default:
 			return false, err
 		}
 	}
