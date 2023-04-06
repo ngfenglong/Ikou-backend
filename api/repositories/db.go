@@ -2,7 +2,7 @@ package repository
 
 import (
 	"database/sql"
-	"fmt"
+
 	"github.com/ngfenglong/ikou-backend/api/config"
 )
 
@@ -14,7 +14,6 @@ func NewDBModel(cfg config.Config) (*DBModel, error) {
 
 	err = db.Ping()
 	if err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 

@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/ngfenglong/ikou-backend/api/dto"
 	"github.com/ngfenglong/ikou-backend/api/models"
 )
 
@@ -55,4 +56,65 @@ func (m *DBModel) InsertToken(userId string, refreshToken string, expiresAt time
 
 	return nil
 
+}
+
+func (m *DBModel) RegisterUser(r dto.RegisterFormInputDto) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	stmt := `
+		Insert into Users (username, firstname, lastname, email, country, profileImage, password) 
+		VALUE (?,?,?,?,?,?,?)
+	`
+	_, err := m.DB.ExecContext(ctx, stmt, r.Username, r.FirstName, r.LastName, r.Email, r.Country, r.ProfileImage, r.Password)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *DBModel) CheckIfUserExists(r dto.RegisterFormInputDto) (bool, bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	checkUsernameStmt := `
+		Select 
+			Count(*) 
+		From 
+			Users 
+		WHERE
+			username = ?
+	`
+
+	row := m.DB.QueryRowContext(ctx, checkUsernameStmt, r.Username)
+
+	var count int
+	err := row.Scan(&count)
+	if err != nil {
+		return false, false, err
+	}
+	if count > 0 {
+		return true, false, nil
+	}
+
+	checkEmailStmt := `
+		Select 
+			Count(*) 
+		From 
+			Users 
+		WHERE
+			email = ?
+	`
+	row = m.DB.QueryRowContext(ctx, checkEmailStmt, r.Email)
+
+	err = row.Scan(&count)
+	if err != nil {
+		return false, false, err
+	}
+	if count > 0 {
+		return false, true, nil
+	}
+
+	return false, false, nil
 }

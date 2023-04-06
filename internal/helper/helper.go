@@ -80,7 +80,7 @@ func InvalidCredential(w http.ResponseWriter) error {
 
 	err := WriteJSONResponse(w, http.StatusUnauthorized, payload)
 	if err != nil {
-		return nil
+		return err
 	}
 
 	return nil
@@ -99,4 +99,21 @@ func PasswordMatches(hash, password string) (bool, error) {
 	}
 
 	return true, nil
+}
+
+func ConflictErrorResponse(errorMessage string, w http.ResponseWriter) error {
+	var payload struct {
+		Error   bool   `json:"error"`
+		Message string `json:"message"`
+	}
+
+	payload.Error = true
+	payload.Message = errorMessage
+
+	err := WriteJSONResponse(w, http.StatusConflict, payload)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
