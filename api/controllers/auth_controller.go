@@ -63,11 +63,19 @@ func (ac *AuthController) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var payload dto.LoginResponseDto
-
+	// var userDto
 	payload.Error = false
 	payload.AccessToken = accessToken
 	payload.RefreshToken = refreshToken
 	payload.Expiry = accessExpiry
+	payload.User = dto.UserDto{
+		UserName:     user.Username,
+		FirstName:    user.FirstName,
+		Email:        user.Email,
+		LastName:     user.LastName,
+		Country:      user.Country,
+		ProfileImage: user.ProfileImage,
+	}
 
 	err = helper.WriteJSONResponse(w, http.StatusOK, payload)
 	if err != nil {

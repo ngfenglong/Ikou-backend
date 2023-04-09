@@ -15,6 +15,16 @@ type LoginResponseDto struct {
 	AccessToken  string    `json:"access_token"`
 	RefreshToken string    `json:"refresh_token"`
 	Expiry       time.Time `json:"expiry"`
+	User         UserDto   `json:"user"`
+}
+
+type UserDto struct {
+	UserName     string `json:"username"`
+	FirstName    string `json:"first_name"`
+	LastName     string `json:"last_name"`
+	Email        string `json:"email"`
+	Country      string `json:"country"`
+	ProfileImage string `json:"profile_image"`
 }
 
 type RegisterFormInputDto struct {

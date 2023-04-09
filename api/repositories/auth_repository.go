@@ -8,13 +8,13 @@ import (
 	"github.com/ngfenglong/ikou-backend/api/models"
 )
 
-func (m *DBModel) GetUserByUsername(username string) (models.LoginUser, error) {
+func (m *DBModel) GetUserByUsername(username string) (*models.User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	var u models.LoginUser
+	var u models.User
 	row := m.DB.QueryRowContext(ctx, `
-		SELECT id, username, email, password
+		SELECT id, username, email, password, firstname, lastname, country, profileImage
 		FROM Users
 		WHERE username = ?
 	`, username)
@@ -24,13 +24,17 @@ func (m *DBModel) GetUserByUsername(username string) (models.LoginUser, error) {
 		&u.Username,
 		&u.Email,
 		&u.Password,
+		&u.FirstName,
+		&u.LastName,
+		&u.Country,
+		&u.ProfileImage,
 	)
 
 	if err != nil {
-		return u, err
+		return nil, err
 	}
 
-	return u, nil
+	return &u, nil
 }
 
 func (m *DBModel) InsertToken(userId string, refreshToken string, expiresAt time.Time) error {

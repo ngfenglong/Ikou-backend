@@ -12,12 +12,15 @@ type Token struct {
 }
 
 type User struct {
-	ID        string `json:"id"`
-	UserName  string `json:"username"`
-	FirstName string `json:"firstname"`
-	Email     string `json:"email"`
-	Password  string `json:"-"`
-	Role      int    `json:"role"`
+	ID           string `json:"id"`
+	Username     string `json:"username"`
+	FirstName    string `json:"firstname"`
+	LastName     string `json:"firstname"`
+	Email        string `json:"email"`
+	Password     string `json:"-"`
+	Country      string `json:"country"`
+	ProfileImage string `json:"profile_image"`
+	Role         int    `json:"role"`
 
 	CreatedAt time.Time `json:"-"`
 	UpdatedAt time.Time `json:"-"`
