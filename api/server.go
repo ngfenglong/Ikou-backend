@@ -58,7 +58,7 @@ func (s *Server) setupRoutes() {
 
 	s.Router.Mount("/api/places", routes.PlaceRoutes(s.App.Store))
 	s.Router.Mount("/api/common", routes.CodestableRoutes(s.App.Store))
-	// s.Router.Mount("/api/auth", routes.PlaceRoutes(s.App.Store))
+	s.Router.Mount("/api/auth", routes.AuthRoutes(s.App.Store))
 
 }
 

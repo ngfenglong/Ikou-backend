@@ -26,7 +26,7 @@ func (cc *CodestableController) GetAllCategories(w http.ResponseWriter, r *http.
 		return
 	}
 
-	err = helper.WriteJSON(w, http.StatusOK, categories)
+	err = helper.WriteJSONResponse(w, http.StatusOK, categories)
 	if err != nil {
 		log.Fatalf("Failed to convert to json: %v", err)
 		return
@@ -40,7 +40,7 @@ func (cc *CodestableController) GetAllSubCategories(w http.ResponseWriter, r *ht
 		return
 	}
 
-	err = helper.WriteJSON(w, http.StatusOK, subCategories)
+	err = helper.WriteJSONResponse(w, http.StatusOK, subCategories)
 	if err != nil {
 		log.Fatalf("Failed to convert to json: %v", err)
 		return
@@ -61,7 +61,7 @@ func (cc *CodestableController) GetSubCategoriesByCategory(w http.ResponseWriter
 		return
 	}
 
-	err = helper.WriteJSON(w, http.StatusOK, subCategories)
+	err = helper.WriteJSONResponse(w, http.StatusOK, subCategories)
 	if err != nil {
 		log.Fatalf("Failed to convert to json: %v", err)
 		return
