@@ -122,3 +122,16 @@ func (m *DBModel) CheckIfUserExists(r dto.RegisterFormInputDto) (bool, bool, err
 
 	return false, false, nil
 }
+
+func (m *DBModel) DeleteToken(refreshToken string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	stmt := `Delete from RefreshTokens where token = ?`
+	_, err := m.DB.ExecContext(ctx, stmt, refreshToken)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

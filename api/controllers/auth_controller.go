@@ -83,7 +83,7 @@ func (ac *AuthController) Login(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (ac *AuthController) Refresh(w http.ResponseWriter, r *http.Request) {
+func (ac *AuthController) RefreshToken(w http.ResponseWriter, r *http.Request) {
 
 }
 
@@ -129,4 +129,42 @@ func (ac *AuthController) Register(w http.ResponseWriter, r *http.Request) {
 		helper.BadRequest(w, r, err)
 		return
 	}
+
+	var payload dto.SuccessResponseDto
+	payload.Error = false
+	payload.Message = "User registered successfully"
+
+	err = helper.WriteJSONResponse(w, http.StatusCreated, payload)
+	if err != nil {
+		helper.BadRequest(w, r, err)
+	}
+
+}
+
+func (ac *AuthController) Logout(w http.ResponseWriter, r *http.Request) {
+	var logoutRequestDto struct {
+		Refresh_token string `json:"refresh_token"`
+	}
+
+	err := helper.ReadJSON(w, r, &logoutRequestDto)
+	if err != nil {
+		helper.BadRequest(w, r, err)
+		return
+	}
+
+	// Todo: Add Validation Handling
+	err = ac.store.DB.DeleteToken(logoutRequestDto.Refresh_token)
+	if err != nil {
+		helper.BadRequest(w, r, err)
+	}
+
+	var payload dto.SuccessResponseDto
+	payload.Error = false
+	payload.Message = "Logout successful"
+
+	err = helper.WriteJSONResponse(w, http.StatusOK, payload)
+	if err != nil {
+		helper.BadRequest(w, r, err)
+	}
+
 }
