@@ -100,6 +100,7 @@ func (ac *AuthController) Register(w http.ResponseWriter, r *http.Request) {
 	usernameExists, emailExists, err := ac.store.DB.CheckIfUserExists(rfi)
 	if err != nil {
 		helper.BadRequest(w, r, err)
+		return
 	}
 
 	if usernameExists {
