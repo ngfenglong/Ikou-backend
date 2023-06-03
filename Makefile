@@ -1,7 +1,5 @@
+# for Window
 SHELL=cmd
-
-hello: 
-	echo "hello"
 
 build:
 	@echo Building...

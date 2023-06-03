@@ -1,0 +1,26 @@
+# Ignore specific environment files
+prod.env
+
+# Exclude other files or directories as needed
+data-seeding/
+dist/
+
+# Ignore development and debugging files
+/.git/
+/.gitignore
+/.gitmodules
+/.gitkeep
+/.hg/
+/.hgignore
+/.hgkeep
+/.svn/
+/.svnignore
+/.svntmp/
+/_darcs/
+/.bzr/
+.bzrignore
+.bzrtmp
+/.bzrcheckpoints
+/.hg/
+/.hgignore
+/.hgtags
