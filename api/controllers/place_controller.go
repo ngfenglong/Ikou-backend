@@ -2,11 +2,13 @@ package controllers
 
 import (
 	"encoding/json"
-	"github.com/ngfenglong/ikou-backend/api/store"
-	"github.com/ngfenglong/ikou-backend/internal/helper"
+	"errors"
 	"log"
 	"net/http"
 	"strconv"
+
+	"github.com/ngfenglong/ikou-backend/api/store"
+	"github.com/ngfenglong/ikou-backend/internal/helper"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -74,4 +76,36 @@ func (pc *PlaceController) GetPlacesBySubCategoryCode(w http.ResponseWriter, r *
 		log.Fatalf("Failed to convert to json: %v", err)
 		return
 	}
+}
+
+func (pc *PlaceController) SearchPlacesByKeyword(w http.ResponseWriter, r *http.Request) {
+	var searchPlaceRequestDto struct {
+		Keyword string `json:"keyword"`
+	}
+
+	err := helper.ReadJSON(w, r, &searchPlaceRequestDto)
+	if err != nil {
+		helper.BadRequest(w, r, err)
+		return
+	}
+
+	if len(searchPlaceRequestDto.Keyword) < 3 {
+		helper.BadRequest(w, r, errors.New("keyword length must be at least 3"))
+		return
+	}
+
+	places, err := pc.store.DB.SearchPlaceByKeyword(searchPlaceRequestDto.Keyword)
+	if err != nil {
+		helper.BadRequest(w, r, err)
+		return
+	}
+
+	out, err := json.MarshalIndent(places, "", "")
+	if err != nil {
+		helper.BadRequest(w, r, err)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(out)
 }
