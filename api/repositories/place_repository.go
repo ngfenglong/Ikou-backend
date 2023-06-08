@@ -140,6 +140,56 @@ func (m *DBModel) GetPlaceById(id string) (models.Place, error) {
 	return place, nil
 }
 
+func (m *DBModel) GetPlacesByCategoryCode(category string) ([]*models.Place, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var places []*models.Place
+
+	query := `
+		SELECT 
+			p.id, p.placename, p.description, p.address, p.lat, p.lon, p.imageUrl, p.averageSpending, 
+			s.decode, p.created_at, p.updated_at, p.created_by
+		FROM Places p
+		Inner Join CodeDecodeSubcategories s on s.code = p.subCategoryCode 
+		INNER JOIN CodeDecodeCategories c on c.code = s.categoryCode
+		WHERE c.decode = ?
+	`
+
+	rows, err := m.DB.QueryContext(ctx, query, category)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var p models.Place
+		err = rows.Scan(
+			&p.ID,
+			&p.Name,
+			&p.Description,
+			&p.Address,
+			&p.Lat,
+			&p.Lon,
+			&p.ImageUrl,
+			&p.AverageSpending,
+			&p.SubCategory,
+			&p.CreatedAt,
+			&p.UpdatedAt,
+			&p.CreatedBy,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		places = append(places, &p)
+	}
+	return places, nil
+}
+
+
 func (m *DBModel) GetPlacesBySubCategoryCode(code int) ([]*models.Place, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
