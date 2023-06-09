@@ -5,10 +5,13 @@ import (
 )
 
 type Token struct {
-	ID     string
-	UserID string
-	Token  string
-	Expiry time.Time
+	ID           string
+	UserID       string
+	Token        string
+	ProfileImage string
+	FirstName    string
+	LastName     string `json:"firstname"`
+	Expiry       time.Time
 }
 
 type User struct {

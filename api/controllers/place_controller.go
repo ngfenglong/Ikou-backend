@@ -97,8 +97,6 @@ func (pc *PlaceController) GetPlacesByCategory(w http.ResponseWriter, r *http.Re
 		helper.BadRequest(w, r, err)
 		return
 	}
-
-	return
 }
 
 func (pc *PlaceController) SearchPlacesByKeyword(w http.ResponseWriter, r *http.Request) {
