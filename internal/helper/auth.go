@@ -11,9 +11,12 @@ var accessTokenSecret = os.Getenv("JTW_ACCESS_SECRET")
 var refreshTokenSecret = os.Getenv("JTW_REFRESH_SECRET")
 
 type TokenDetail struct {
-	ID       string
-	Email    string
-	Username string
+	ID           string
+	Email        string
+	Username     string
+	ProfileImage string
+	FirstName    string
+	LastName     string
 }
 
 func GenerateAccessToken(td *TokenDetail) (string, time.Time, error) {
@@ -23,6 +26,9 @@ func GenerateAccessToken(td *TokenDetail) (string, time.Time, error) {
 	claims["ID"] = td.ID
 	claims["Email"] = td.Email
 	claims["Username"] = td.Username
+	claims["ProfileImage"] = td.ProfileImage
+	claims["FirstName"] = td.FirstName
+	claims["LastName"] = td.LastName
 	claims["exp"] = expiry
 
 	signedToken, err := token.SignedString([]byte(accessTokenSecret))

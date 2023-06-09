@@ -60,10 +60,11 @@ func BadRequest(w http.ResponseWriter, r *http.Request, err error) error {
 
 	out, err := json.MarshalIndent(payload, "", "\t")
 	if err != nil {
-		return nil
+		return err
 	}
 
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusBadRequest)
 	w.Write(out)
 
 	return nil

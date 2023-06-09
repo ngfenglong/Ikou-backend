@@ -2,11 +2,13 @@ package controllers
 
 import (
 	"encoding/json"
-	"github.com/ngfenglong/ikou-backend/api/store"
-	"github.com/ngfenglong/ikou-backend/internal/helper"
+	"errors"
 	"log"
 	"net/http"
 	"strconv"
+
+	"github.com/ngfenglong/ikou-backend/api/store"
+	"github.com/ngfenglong/ikou-backend/internal/helper"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -59,19 +61,72 @@ func (pc *PlaceController) GetPlacesBySubCategoryCode(w http.ResponseWriter, r *
 	code := chi.URLParam(r, "code")
 	subCategoryCode, err := strconv.Atoi(code)
 	if err != nil {
-		log.Fatalf("Failed to convert parameter into int: %v", err)
+		helper.BadRequest(w, r, err)
 		return
 	}
 
 	places, err := pc.store.DB.GetPlacesBySubCategoryCode(subCategoryCode)
 	if err != nil {
-		log.Fatalf("Failed to execute queries: %v", err)
+		helper.BadRequest(w, r, err)
 		return
 	}
 
 	err = helper.WriteJSONResponse(w, http.StatusOK, places)
 	if err != nil {
-		log.Fatalf("Failed to convert to json: %v", err)
+		helper.BadRequest(w, r, err)
 		return
 	}
+}
+
+func (pc *PlaceController) GetPlacesByCategory(w http.ResponseWriter, r *http.Request) {
+	category := chi.URLParam(r, "category")
+
+	if category == "" {
+		helper.BadRequest(w, r, errors.New("category is invalid"))
+		return
+	}
+
+	places, err := pc.store.DB.GetPlacesByCategoryCode(category)
+	if err != nil {
+		helper.BadRequest(w, r, err)
+		return
+	}
+
+	err = helper.WriteJSONResponse(w, http.StatusOK, places)
+	if err != nil {
+		helper.BadRequest(w, r, err)
+		return
+	}
+}
+
+func (pc *PlaceController) SearchPlacesByKeyword(w http.ResponseWriter, r *http.Request) {
+	var searchPlaceRequestDto struct {
+		Keyword string `json:"keyword"`
+	}
+
+	err := helper.ReadJSON(w, r, &searchPlaceRequestDto)
+	if err != nil {
+		helper.BadRequest(w, r, err)
+		return
+	}
+
+	if len(searchPlaceRequestDto.Keyword) < 3 {
+		helper.BadRequest(w, r, errors.New("keyword length must be at least 3"))
+		return
+	}
+
+	places, err := pc.store.DB.SearchPlaceByKeyword(searchPlaceRequestDto.Keyword)
+	if err != nil {
+		helper.BadRequest(w, r, err)
+		return
+	}
+
+	out, err := json.MarshalIndent(places, "", "")
+	if err != nil {
+		helper.BadRequest(w, r, err)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(out)
 }

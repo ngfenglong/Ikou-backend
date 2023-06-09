@@ -39,9 +39,12 @@ func (ac *AuthController) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tokenDetail := &helper.TokenDetail{
-		ID:       user.ID,
-		Email:    user.Email,
-		Username: user.Username,
+		ID:           user.ID,
+		Email:        user.Email,
+		Username:     user.Username,
+		ProfileImage: user.ProfileImage,
+		FirstName:    user.FirstName,
+		LastName:     user.LastName,
 	}
 
 	accessToken, accessExpiry, err := helper.GenerateAccessToken(tokenDetail)

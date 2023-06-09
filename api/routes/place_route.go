@@ -14,6 +14,8 @@ func PlaceRoutes(store *store.Store) chi.Router {
 	mux.Get("/", placeController.GetAllPlaces)
 	mux.Get("/getPlaceById/{id}", placeController.GetPlaceById)
 	mux.Get("/getPlacesBySubCategory/{code}", placeController.GetPlacesBySubCategoryCode)
+	mux.Get("/getPlacesByCategory/{category}", placeController.GetPlacesByCategory)
+	mux.Post("/searchPlaceByKeyword", placeController.SearchPlacesByKeyword)
 
 	return mux
 }
