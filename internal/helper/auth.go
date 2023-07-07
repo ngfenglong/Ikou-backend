@@ -23,12 +23,12 @@ func GenerateAccessToken(td *TokenDetail) (string, time.Time, error) {
 	token := jwt.New(jwt.SigningMethodHS256)
 	expiry := time.Now().Add(time.Hour * 24 * 3)
 	claims := token.Claims.(jwt.MapClaims)
-	claims["ID"] = td.ID
-	claims["Email"] = td.Email
-	claims["Username"] = td.Username
-	claims["ProfileImage"] = td.ProfileImage
-	claims["FirstName"] = td.FirstName
-	claims["LastName"] = td.LastName
+	claims["id"] = td.ID
+	claims["email"] = td.Email
+	claims["username"] = td.Username
+	claims["profile_image"] = td.ProfileImage
+	claims["first_name"] = td.FirstName
+	claims["last_name"] = td.LastName
 	claims["exp"] = expiry
 
 	signedToken, err := token.SignedString([]byte(accessTokenSecret))
@@ -44,10 +44,10 @@ func GenerateRefreshToken(td *TokenDetail) (string, time.Time, error) {
 	expiry := time.Now().Add(time.Hour * 24 * 7)
 
 	claims := token.Claims.(jwt.MapClaims)
-	claims["ID"] = td.ID
+	claims["id"] = td.ID
 	claims["exp"] = expiry
 
-	signedToken, err := token.SignedString([]byte(accessTokenSecret))
+	signedToken, err := token.SignedString([]byte(refreshTokenSecret))
 	if err != nil {
 		return "", expiry, err
 	}
