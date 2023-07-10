@@ -17,8 +17,8 @@ type Token struct {
 type User struct {
 	ID           string `json:"id"`
 	Username     string `json:"username"`
-	FirstName    string `json:"firstname"`
-	LastName     string `json:"firstname"`
+	FirstName    string `json:"first_name"`
+	LastName     string `json:"last_name"`
 	Email        string `json:"email"`
 	Password     string `json:"-"`
 	Country      string `json:"country"`
