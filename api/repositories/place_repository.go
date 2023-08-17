@@ -2,9 +2,11 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 	"time"
 
 	"github.com/ngfenglong/ikou-backend/api/models"
+	"github.com/ngfenglong/ikou-backend/internal/util"
 )
 
 // #region Place API
@@ -12,16 +14,20 @@ func (m *DBModel) GetAllPlaces() ([]*models.Place, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	var places []*models.Place
+	placesMap := make(map[string]*models.Place)
 
 	query := `
 	SELECT 
-		p.id, p.placename, p.description, p.address, p.lat, p.lon, p.imageUrl, p.averageSpending, 
-		s.decode, c.decode, p.created_at, p.updated_at, p.created_by
-	FROM 
-		Places p
-		Inner Join CodeDecodeSubcategories s on s.code = p.subCategoryCode
-		Inner Join CodeDecodeCategories c on c.code = s.categorycode
+			p.id, p.placename, p.description, p.address, p.lat, p.lon, p.imageUrl, p.averageSpending, 
+			s.decode, c.decode, p.created_at, p.updated_at, p.created_by,
+			r.id, r.rating, r.reviewDescription, u.profileImage, r.created_at, r.updated_at, u.username
+		FROM 
+			Places p
+			Inner Join CodeDecodeSubcategories s on s.code = p.subCategoryCode
+			Inner Join CodeDecodeCategories c on c.code = s.categorycode
+			Left Join Reviews r on p.id = r.place_id
+			Left Join Users u on u.id = r.created_by
+		ORDER BY p.id
 	`
 
 	rows, err := m.DB.QueryContext(ctx, query)
@@ -33,6 +39,16 @@ func (m *DBModel) GetAllPlaces() ([]*models.Place, error) {
 
 	for rows.Next() {
 		var p models.Place
+		var r models.Review
+
+		var rID sql.NullString
+		var rRating sql.NullString
+		var rReviewDescription sql.NullString
+		var rReviewerProfileImage sql.NullString
+		var rCreatedAt sql.NullTime
+		var rUpdatedAt sql.NullTime
+		var rCreatedBy sql.NullString
+
 		err = rows.Scan(
 			&p.ID,
 			&p.Name,
@@ -47,13 +63,42 @@ func (m *DBModel) GetAllPlaces() ([]*models.Place, error) {
 			&p.CreatedAt,
 			&p.UpdatedAt,
 			&p.CreatedBy,
+			&rID,
+			&rRating,
+			&rReviewDescription,
+			&rReviewerProfileImage,
+			&rCreatedAt,
+			&rUpdatedAt,
+			&rCreatedBy,
 		)
 		if err != nil {
 			return nil, err
 		}
 
-		places = append(places, &p)
+		place, exists := placesMap[p.ID]
+		if !exists {
+			place = &p
+			place.Reviews = []*models.Review{}
+			placesMap[p.ID] = place
+		}
+
+		if rID.Valid && rRating.Valid && rCreatedBy.Valid {
+			r.ID = rID.String
+			r.Rating = rRating.String
+			r.ReviewDescription = util.CoalesceNullString(rReviewDescription)
+			r.ReviewerProfileImage = util.CoalesceNullString(rReviewerProfileImage)
+			r.CreatedAt = rCreatedAt.Time
+			r.UpdatedAt = rUpdatedAt.Time
+			r.CreatedBy = rCreatedBy.String
+			place.Reviews = append(place.Reviews, &r)
+		}
 	}
+
+	places := make([]*models.Place, 0, len(placesMap))
+	for _, place := range placesMap {
+		places = append(places, place)
+	}
+
 	return places, nil
 }
 
@@ -144,16 +189,20 @@ func (m *DBModel) GetPlacesByCategoryCode(category string) ([]*models.Place, err
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	var places []*models.Place
+	placesMap := make(map[string]*models.Place)
 
 	query := `
 		SELECT 
 			p.id, p.placename, p.description, p.address, p.lat, p.lon, p.imageUrl, p.averageSpending, 
-			s.decode, p.created_at, p.updated_at, p.created_by
+			s.decode, c.decode, p.created_at, p.updated_at, p.created_by,
+			r.id, r.rating, r.reviewDescription, u.profileImage, r.created_at, r.updated_at, u.username
 		FROM Places p
 		Inner Join CodeDecodeSubcategories s on s.code = p.subCategoryCode 
 		INNER JOIN CodeDecodeCategories c on c.code = s.categoryCode
+		Left Join Reviews r on p.id = r.place_id
+		Left Join Users u on u.id = r.created_by
 		WHERE c.decode = ?
+		Order by p.id
 	`
 
 	rows, err := m.DB.QueryContext(ctx, query, category)
@@ -166,6 +215,16 @@ func (m *DBModel) GetPlacesByCategoryCode(category string) ([]*models.Place, err
 
 	for rows.Next() {
 		var p models.Place
+		var r models.Review
+
+		var rID sql.NullString
+		var rRating sql.NullString
+		var rReviewDescription sql.NullString
+		var rReviewerProfileImage sql.NullString
+		var rCreatedAt sql.NullTime
+		var rUpdatedAt sql.NullTime
+		var rCreatedBy sql.NullString
+
 		err = rows.Scan(
 			&p.ID,
 			&p.Name,
@@ -176,19 +235,49 @@ func (m *DBModel) GetPlacesByCategoryCode(category string) ([]*models.Place, err
 			&p.ImageUrl,
 			&p.AverageSpending,
 			&p.SubCategory,
+			&p.Category,
 			&p.CreatedAt,
 			&p.UpdatedAt,
 			&p.CreatedBy,
+			&rID,
+			&rRating,
+			&rReviewDescription,
+			&rReviewerProfileImage,
+			&rCreatedAt,
+			&rUpdatedAt,
+			&rCreatedBy,
 		)
+
 		if err != nil {
 			return nil, err
 		}
 
-		places = append(places, &p)
+		place, exists := placesMap[p.ID]
+		if !exists {
+			place = &p
+			place.Reviews = []*models.Review{}
+			placesMap[p.ID] = place
+		}
+
+		if rID.Valid && rRating.Valid && rCreatedBy.Valid {
+			r.ID = rID.String
+			r.Rating = rRating.String
+			r.ReviewDescription = util.CoalesceNullString(rReviewDescription)
+			r.ReviewerProfileImage = util.CoalesceNullString(rReviewerProfileImage)
+			r.CreatedAt = rCreatedAt.Time
+			r.UpdatedAt = rUpdatedAt.Time
+			r.CreatedBy = rCreatedBy.String
+			place.Reviews = append(place.Reviews, &r)
+		}
 	}
+
+	places := make([]*models.Place, 0, len(placesMap))
+	for _, place := range placesMap {
+		places = append(places, place)
+	}
+
 	return places, nil
 }
-
 
 func (m *DBModel) GetPlacesBySubCategoryCode(code int) ([]*models.Place, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
