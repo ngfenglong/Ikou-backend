@@ -19,12 +19,13 @@ func (m *DBModel) GetAllPlaces() ([]*models.Place, error) {
 	query := `
 	SELECT 
 			p.id, p.placename, p.description, p.address, p.lat, p.lon, p.imageUrl, p.averageSpending, 
-			s.decode, c.decode, p.created_at, p.updated_at, p.created_by,
+			s.decode, c.decode, a.decode, p.created_at, p.updated_at, p.created_by,
 			r.id, r.rating, r.reviewDescription, u.profileImage, r.created_at, r.updated_at, u.username
 		FROM 
 			Places p
 			Inner Join CodeDecodeSubcategories s on s.code = p.subCategoryCode
 			Inner Join CodeDecodeCategories c on c.code = s.categorycode
+			Inner Join CodeDecodeArea a on a.code = p.areaCode
 			Left Join Reviews r on p.id = r.place_id
 			Left Join Users u on u.id = r.created_by
 		ORDER BY p.id
@@ -60,6 +61,7 @@ func (m *DBModel) GetAllPlaces() ([]*models.Place, error) {
 			&p.AverageSpending,
 			&p.SubCategory,
 			&p.Category,
+			&p.Area,
 			&p.CreatedAt,
 			&p.UpdatedAt,
 			&p.CreatedBy,
@@ -111,11 +113,12 @@ func (m *DBModel) GetPlaceById(id string) (models.Place, error) {
 	row := m.DB.QueryRowContext(ctx, `
 		SELECT 
 			p.id, p.placename, p.description, p.address, p.lat, p.lon, p.imageUrl, p.averageSpending, 
-			s.decode, c.decode, p.created_at, p.updated_at, p.created_by
+			s.decode, c.decode, a.decode, p.created_at, p.updated_at, p.created_by
 		FROM 
 			Places p
 			Inner Join CodeDecodeSubcategories s on s.code = p.subCategoryCode
 			Inner Join CodeDecodeCategories c on c.code = s.categorycode
+			Inner Join CodeDecodeArea a on a.code = p.areaCode
 		WHERE 
 			p.id = ?`, id)
 
@@ -129,6 +132,7 @@ func (m *DBModel) GetPlaceById(id string) (models.Place, error) {
 		&place.ImageUrl,
 		&place.AverageSpending,
 		&place.SubCategory,
+		&place.Area,
 		&place.Category,
 		&place.CreatedAt,
 		&place.UpdatedAt,
@@ -194,11 +198,12 @@ func (m *DBModel) GetPlacesByCategoryCode(category string) ([]*models.Place, err
 	query := `
 		SELECT 
 			p.id, p.placename, p.description, p.address, p.lat, p.lon, p.imageUrl, p.averageSpending, 
-			s.decode, c.decode, p.created_at, p.updated_at, p.created_by,
+			s.decode, c.decode, a.decode, p.created_at, p.updated_at, p.created_by,
 			r.id, r.rating, r.reviewDescription, u.profileImage, r.created_at, r.updated_at, u.username
 		FROM Places p
 		Inner Join CodeDecodeSubcategories s on s.code = p.subCategoryCode 
 		INNER JOIN CodeDecodeCategories c on c.code = s.categoryCode
+		Inner Join CodeDecodeArea a on a.code = p.areaCode
 		Left Join Reviews r on p.id = r.place_id
 		Left Join Users u on u.id = r.created_by
 		WHERE c.decode = ?
@@ -236,6 +241,7 @@ func (m *DBModel) GetPlacesByCategoryCode(category string) ([]*models.Place, err
 			&p.AverageSpending,
 			&p.SubCategory,
 			&p.Category,
+			&p.Area,
 			&p.CreatedAt,
 			&p.UpdatedAt,
 			&p.CreatedBy,
@@ -288,9 +294,10 @@ func (m *DBModel) GetPlacesBySubCategoryCode(code int) ([]*models.Place, error) 
 	query := `
 		SELECT 
 			p.id, p.placename, p.description, p.address, p.lat, p.lon, p.imageUrl, p.averageSpending, 
-			s.decode, p.created_at, p.updated_at, p.created_by
+			s.decode, a.decode, p.created_at, p.updated_at, p.created_by
 		FROM Places p
 		Inner Join CodeDecodeSubcategories s on s.code = p.subCategoryCode
+		Inner Join CodeDecodeArea a on a.code = p.areaCode
 		WHERE subCategoryCode = ?
 	`
 
@@ -314,6 +321,7 @@ func (m *DBModel) GetPlacesBySubCategoryCode(code int) ([]*models.Place, error) 
 			&p.ImageUrl,
 			&p.AverageSpending,
 			&p.SubCategory,
+			&p.Area,
 			&p.CreatedAt,
 			&p.UpdatedAt,
 			&p.CreatedBy,
@@ -339,9 +347,10 @@ func (m *DBModel) SearchPlaceByKeyword(keyword string) ([]*models.Place, error) 
 	query := `
 		SELECT 
 			p.id, p.placename, p.description, p.address, p.lat, p.lon, p.imageUrl, p.averageSpending, 
-			s.decode, p.created_at, p.updated_at, p.created_by
+			s.decode, a.decode, p.created_at, p.updated_at, p.created_by
 		FROM Places p
 		Inner Join CodeDecodeSubcategories s on s.code = p.subCategoryCode
+		Inner Join CodeDecodeArea a on a.code = p.areaCode
 		WHERE p.address like ? OR p.placename like ?
 	`
 
@@ -363,6 +372,7 @@ func (m *DBModel) SearchPlaceByKeyword(keyword string) ([]*models.Place, error) 
 			&p.ImageUrl,
 			&p.AverageSpending,
 			&p.SubCategory,
+			&p.Area,
 			&p.CreatedAt,
 			&p.UpdatedAt,
 			&p.CreatedBy,
