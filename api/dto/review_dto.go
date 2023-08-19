@@ -1,8 +1,8 @@
-package models
+package dto
 
 import "time"
 
-type Review struct {
+type ReviewDTO struct {
 	ID                   string    `json:"id"`
 	Rating               int       `json:"rating"`
 	ReviewDescription    string    `json:"review_description"`

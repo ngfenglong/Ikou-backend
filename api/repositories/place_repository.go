@@ -5,12 +5,14 @@ import (
 	"database/sql"
 	"time"
 
+	"github.com/ngfenglong/ikou-backend/api/dto"
+	"github.com/ngfenglong/ikou-backend/api/mapper"
 	"github.com/ngfenglong/ikou-backend/api/models"
 	"github.com/ngfenglong/ikou-backend/internal/util"
 )
 
 // #region Place API
-func (m *DBModel) GetAllPlaces() ([]*models.Place, error) {
+func (m *DBModel) GetAllPlaces() ([]*dto.PlaceDTO, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
@@ -43,7 +45,7 @@ func (m *DBModel) GetAllPlaces() ([]*models.Place, error) {
 		var r models.Review
 
 		var rID sql.NullString
-		var rRating sql.NullString
+		var rRating sql.NullInt32
 		var rReviewDescription sql.NullString
 		var rReviewerProfileImage sql.NullString
 		var rCreatedAt sql.NullTime
@@ -86,7 +88,7 @@ func (m *DBModel) GetAllPlaces() ([]*models.Place, error) {
 
 		if rID.Valid && rRating.Valid && rCreatedBy.Valid {
 			r.ID = rID.String
-			r.Rating = rRating.String
+			r.Rating = util.CoalesceNullInt(rRating)
 			r.ReviewDescription = util.CoalesceNullString(rReviewDescription)
 			r.ReviewerProfileImage = util.CoalesceNullString(rReviewerProfileImage)
 			r.CreatedAt = rCreatedAt.Time
@@ -96,15 +98,15 @@ func (m *DBModel) GetAllPlaces() ([]*models.Place, error) {
 		}
 	}
 
-	places := make([]*models.Place, 0, len(placesMap))
+	places := make([]*dto.PlaceDTO, 0, len(placesMap))
 	for _, place := range placesMap {
-		places = append(places, place)
+		places = append(places, mapper.MapToPlaceDTO(place))
 	}
 
 	return places, nil
 }
 
-func (m *DBModel) GetPlaceById(id string) (models.Place, error) {
+func (m *DBModel) GetPlaceById(id string) (*dto.PlaceDTO, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
@@ -141,7 +143,7 @@ func (m *DBModel) GetPlaceById(id string) (models.Place, error) {
 
 	if err != nil {
 		// Can add som error handling here
-		return place, err
+		return nil, err
 	}
 
 	query := `
@@ -157,7 +159,7 @@ func (m *DBModel) GetPlaceById(id string) (models.Place, error) {
 
 	rows, err := m.DB.QueryContext(ctx, query, id)
 	if err != nil {
-		return place, err
+		return nil, err
 	}
 
 	defer rows.Close()
@@ -175,7 +177,7 @@ func (m *DBModel) GetPlaceById(id string) (models.Place, error) {
 			&r.CreatedBy,
 		)
 		if err != nil {
-			return place, err
+			return nil, err
 		}
 		reviews = append(reviews, &r)
 	}
@@ -186,10 +188,10 @@ func (m *DBModel) GetPlaceById(id string) (models.Place, error) {
 		place.Reviews = reviews
 	}
 
-	return place, nil
+	return mapper.MapToPlaceDTO(&place), nil
 }
 
-func (m *DBModel) GetPlacesByCategoryCode(category string) ([]*models.Place, error) {
+func (m *DBModel) GetPlacesByCategoryCode(category string) ([]*dto.PlaceDTO, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
@@ -223,7 +225,7 @@ func (m *DBModel) GetPlacesByCategoryCode(category string) ([]*models.Place, err
 		var r models.Review
 
 		var rID sql.NullString
-		var rRating sql.NullString
+		var rRating sql.NullInt32
 		var rReviewDescription sql.NullString
 		var rReviewerProfileImage sql.NullString
 		var rCreatedAt sql.NullTime
@@ -267,7 +269,7 @@ func (m *DBModel) GetPlacesByCategoryCode(category string) ([]*models.Place, err
 
 		if rID.Valid && rRating.Valid && rCreatedBy.Valid {
 			r.ID = rID.String
-			r.Rating = rRating.String
+			r.Rating = util.CoalesceNullInt(rRating)
 			r.ReviewDescription = util.CoalesceNullString(rReviewDescription)
 			r.ReviewerProfileImage = util.CoalesceNullString(rReviewerProfileImage)
 			r.CreatedAt = rCreatedAt.Time
@@ -277,28 +279,34 @@ func (m *DBModel) GetPlacesByCategoryCode(category string) ([]*models.Place, err
 		}
 	}
 
-	places := make([]*models.Place, 0, len(placesMap))
+	places := make([]*dto.PlaceDTO, 0, len(placesMap))
 	for _, place := range placesMap {
-		places = append(places, place)
+		places = append(places, mapper.MapToPlaceDTO(place))
 	}
 
 	return places, nil
 }
 
-func (m *DBModel) GetPlacesBySubCategoryCode(code int) ([]*models.Place, error) {
+func (m *DBModel) GetPlacesBySubCategoryCode(code int) ([]*dto.PlaceDTO, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	var places []*models.Place
+	placesMap := make(map[string]*models.Place)
 
 	query := `
 		SELECT 
-			p.id, p.placename, p.description, p.address, p.lat, p.lon, p.imageUrl, p.averageSpending, 
-			s.decode, a.decode, p.created_at, p.updated_at, p.created_by
-		FROM Places p
+		p.id, p.placename, p.description, p.address, p.lat, p.lon, p.imageUrl, p.averageSpending, 
+		s.decode, c.decode, a.decode, p.created_at, p.updated_at, p.created_by,
+		r.id, r.rating, r.reviewDescription, u.profileImage, r.created_at, r.updated_at, u.username
+	FROM 
+		Places p
 		Inner Join CodeDecodeSubcategories s on s.code = p.subCategoryCode
+		Inner Join CodeDecodeCategories c on c.code = s.categorycode
 		Inner Join CodeDecodeArea a on a.code = p.areaCode
-		WHERE subCategoryCode = ?
+		Left Join Reviews r on p.id = r.place_id
+		Left Join Users u on u.id = r.created_by
+	WHERE subCategoryCode = ?
+	ORDER BY p.id
 	`
 
 	rows, err := m.DB.QueryContext(ctx, query, code)
@@ -311,6 +319,16 @@ func (m *DBModel) GetPlacesBySubCategoryCode(code int) ([]*models.Place, error) 
 
 	for rows.Next() {
 		var p models.Place
+		var r models.Review
+
+		var rID sql.NullString
+		var rRating sql.NullInt32
+		var rReviewDescription sql.NullString
+		var rReviewerProfileImage sql.NullString
+		var rCreatedAt sql.NullTime
+		var rUpdatedAt sql.NullTime
+		var rCreatedBy sql.NullString
+
 		err = rows.Scan(
 			&p.ID,
 			&p.Name,
@@ -321,25 +339,55 @@ func (m *DBModel) GetPlacesBySubCategoryCode(code int) ([]*models.Place, error) 
 			&p.ImageUrl,
 			&p.AverageSpending,
 			&p.SubCategory,
+			&p.Category,
 			&p.Area,
 			&p.CreatedAt,
 			&p.UpdatedAt,
 			&p.CreatedBy,
+			&rID,
+			&rRating,
+			&rReviewDescription,
+			&rReviewerProfileImage,
+			&rCreatedAt,
+			&rUpdatedAt,
+			&rCreatedBy,
 		)
 		if err != nil {
 			return nil, err
 		}
 
-		places = append(places, &p)
+		place, exists := placesMap[p.ID]
+		if !exists {
+			place = &p
+			place.Reviews = []*models.Review{}
+			placesMap[p.ID] = place
+		}
+
+		if rID.Valid && rRating.Valid && rCreatedBy.Valid {
+			r.ID = rID.String
+			r.Rating = util.CoalesceNullInt(rRating)
+			r.ReviewDescription = util.CoalesceNullString(rReviewDescription)
+			r.ReviewerProfileImage = util.CoalesceNullString(rReviewerProfileImage)
+			r.CreatedAt = rCreatedAt.Time
+			r.UpdatedAt = rUpdatedAt.Time
+			r.CreatedBy = rCreatedBy.String
+			place.Reviews = append(place.Reviews, &r)
+		}
 	}
+
+	places := make([]*dto.PlaceDTO, 0, len(placesMap))
+	for _, place := range placesMap {
+		places = append(places, mapper.MapToPlaceDTO(place))
+	}
+
 	return places, nil
 }
 
-func (m *DBModel) SearchPlaceByKeyword(keyword string) ([]*models.Place, error) {
+func (m *DBModel) SearchPlaceByKeyword(keyword string) ([]*dto.PlaceDTO, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	var places []*models.Place
+	placesMap := make(map[string]*models.Place)
 
 	addressKeyword := "%" + keyword + "%"
 	placenameKeyword := "%" + keyword + "%"
@@ -347,10 +395,15 @@ func (m *DBModel) SearchPlaceByKeyword(keyword string) ([]*models.Place, error) 
 	query := `
 		SELECT 
 			p.id, p.placename, p.description, p.address, p.lat, p.lon, p.imageUrl, p.averageSpending, 
-			s.decode, a.decode, p.created_at, p.updated_at, p.created_by
-		FROM Places p
-		Inner Join CodeDecodeSubcategories s on s.code = p.subCategoryCode
-		Inner Join CodeDecodeArea a on a.code = p.areaCode
+			s.decode, c.decode, a.decode, p.created_at, p.updated_at, p.created_by,
+			r.id, r.rating, r.reviewDescription, u.profileImage, r.created_at, r.updated_at, u.username
+		FROM 
+			Places p
+			Inner Join CodeDecodeSubcategories s on s.code = p.subCategoryCode
+			Inner Join CodeDecodeCategories c on c.code = s.categorycode
+			Inner Join CodeDecodeArea a on a.code = p.areaCode
+			Left Join Reviews r on p.id = r.place_id
+			Left Join Users u on u.id = r.created_by
 		WHERE p.address like ? OR p.placename like ?
 	`
 
@@ -360,8 +413,20 @@ func (m *DBModel) SearchPlaceByKeyword(keyword string) ([]*models.Place, error) 
 		return nil, err
 	}
 
+	defer rows.Close()
+
 	for rows.Next() {
 		var p models.Place
+		var r models.Review
+
+		var rID sql.NullString
+		var rRating sql.NullInt32
+		var rReviewDescription sql.NullString
+		var rReviewerProfileImage sql.NullString
+		var rCreatedAt sql.NullTime
+		var rUpdatedAt sql.NullTime
+		var rCreatedBy sql.NullString
+
 		err = rows.Scan(
 			&p.ID,
 			&p.Name,
@@ -372,16 +437,47 @@ func (m *DBModel) SearchPlaceByKeyword(keyword string) ([]*models.Place, error) 
 			&p.ImageUrl,
 			&p.AverageSpending,
 			&p.SubCategory,
+			&p.Category,
 			&p.Area,
 			&p.CreatedAt,
 			&p.UpdatedAt,
 			&p.CreatedBy,
+			&rID,
+			&rRating,
+			&rReviewDescription,
+			&rReviewerProfileImage,
+			&rCreatedAt,
+			&rUpdatedAt,
+			&rCreatedBy,
 		)
 		if err != nil {
 			return nil, err
 		}
-		places = append(places, &p)
+
+		place, exists := placesMap[p.ID]
+		if !exists {
+			place = &p
+			place.Reviews = []*models.Review{}
+			placesMap[p.ID] = place
+		}
+
+		if rID.Valid && rRating.Valid && rCreatedBy.Valid {
+			r.ID = rID.String
+			r.Rating = util.CoalesceNullInt(rRating)
+			r.ReviewDescription = util.CoalesceNullString(rReviewDescription)
+			r.ReviewerProfileImage = util.CoalesceNullString(rReviewerProfileImage)
+			r.CreatedAt = rCreatedAt.Time
+			r.UpdatedAt = rUpdatedAt.Time
+			r.CreatedBy = rCreatedBy.String
+			place.Reviews = append(place.Reviews, &r)
+		}
 	}
+
+	places := make([]*dto.PlaceDTO, 0, len(placesMap))
+	for _, place := range placesMap {
+		places = append(places, mapper.MapToPlaceDTO(place))
+	}
+
 	return places, nil
 }
 

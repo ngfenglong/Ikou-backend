@@ -2,23 +2,23 @@ package dto
 
 import "time"
 
-type SignUpUser struct{}
+type SignUpUserDTO struct{}
 
-type LoginCredentialInputDto struct {
+type LoginCredentialInputDTO struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
 
-type LoginResponseDto struct {
+type LoginResponseDTO struct {
 	Error        bool      `json:"error"`
 	Message      string    `json:"message"`
 	AccessToken  string    `json:"access_token"`
 	RefreshToken string    `json:"refresh_token"`
 	Expiry       time.Time `json:"expiry"`
-	User         UserDto   `json:"user"`
+	User         UserDTO   `json:"user"`
 }
 
-type UserDto struct {
+type UserDTO struct {
 	UserName     string `json:"username"`
 	FirstName    string `json:"first_name"`
 	LastName     string `json:"last_name"`
@@ -27,7 +27,7 @@ type UserDto struct {
 	ProfileImage string `json:"profile_image"`
 }
 
-type RegisterFormInputDto struct {
+type RegisterFormInputDTO struct {
 	Username     string `json:"username"`
 	FirstName    string `json:"first_name"`
 	LastName     string `json:"last_name"`

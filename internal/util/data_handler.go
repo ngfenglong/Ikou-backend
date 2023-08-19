@@ -9,3 +9,11 @@ func CoalesceNullString(s sql.NullString) string {
 
 	return ""
 }
+
+func CoalesceNullInt(i sql.NullInt32) int {
+	if i.Valid {
+		return int(i.Int32)
+	}
+
+	return 0
+}

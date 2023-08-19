@@ -18,7 +18,7 @@ func NewAuthController(store *store.Store) *AuthController {
 }
 
 func (ac *AuthController) Login(w http.ResponseWriter, r *http.Request) {
-	var loginCredentialInput dto.LoginCredentialInputDto
+	var loginCredentialInput dto.LoginCredentialInputDTO
 
 	err := helper.ReadJSON(w, r, &loginCredentialInput)
 	if err != nil {
@@ -65,13 +65,13 @@ func (ac *AuthController) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var payload dto.LoginResponseDto
+	var payload dto.LoginResponseDTO
 	// var userDto
 	payload.Error = false
 	payload.AccessToken = accessToken
 	payload.RefreshToken = refreshToken
 	payload.Expiry = accessExpiry
-	payload.User = dto.UserDto{
+	payload.User = dto.UserDTO{
 		UserName:     user.Username,
 		FirstName:    user.FirstName,
 		Email:        user.Email,
@@ -91,7 +91,7 @@ func (ac *AuthController) RefreshToken(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ac *AuthController) Register(w http.ResponseWriter, r *http.Request) {
-	var rfi dto.RegisterFormInputDto
+	var rfi dto.RegisterFormInputDTO
 
 	err := helper.ReadJSON(w, r, &rfi)
 	if err != nil {
