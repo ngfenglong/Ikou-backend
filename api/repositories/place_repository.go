@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"time"
 
 	"github.com/ngfenglong/ikou-backend/api/dto"
@@ -142,8 +143,11 @@ func (m *DBModel) GetPlaceById(id string) (*dto.PlaceDTO, error) {
 	)
 
 	if err != nil {
-		// Can add som error handling here
-		return nil, err
+		if err == sql.ErrNoRows {
+			return nil, errors.New("record not found")
+		} else {
+			return nil, err
+		}
 	}
 
 	query := `
