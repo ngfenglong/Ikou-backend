@@ -62,7 +62,7 @@ func (m *DBModel) InsertToken(userId string, refreshToken string, expiresAt time
 
 }
 
-func (m *DBModel) RegisterUser(r dto.RegisterFormInputDto) error {
+func (m *DBModel) RegisterUser(r dto.RegisterFormInputDTO) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
@@ -78,7 +78,7 @@ func (m *DBModel) RegisterUser(r dto.RegisterFormInputDto) error {
 	return nil
 }
 
-func (m *DBModel) CheckIfUserExists(r dto.RegisterFormInputDto) (bool, bool, error) {
+func (m *DBModel) CheckIfUserExists(r dto.RegisterFormInputDTO) (bool, bool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 

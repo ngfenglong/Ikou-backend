@@ -42,14 +42,14 @@ func (pc *PlaceController) GetPlaceById(w http.ResponseWriter, r *http.Request) 
 	place, err := pc.store.DB.GetPlaceById(id)
 
 	if err != nil {
-		log.Fatalf("Failed to execute queries: %v", err)
+		helper.BadRequest(w, r, err)
 		return
 	}
 
 	out, err := json.MarshalIndent(place, "", " ")
 
 	if err != nil {
-		log.Fatalf("Failed to convert to json: %v", err)
+		helper.BadRequest(w, r, err)
 		return
 	}
 
