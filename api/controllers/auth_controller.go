@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/ngfenglong/ikou-backend/api/dto"
@@ -53,7 +54,7 @@ func (ac *AuthController) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	refreshToken, refreshExpiry, err := helper.GenerateRefreshToken(tokenDetail)
+	refreshToken, refreshExpiry, err := helper.GenerateRefreshToken(tokenDetail.ID)
 	if err != nil {
 		helper.BadRequest(w, r, err)
 		return
@@ -87,7 +88,70 @@ func (ac *AuthController) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ac *AuthController) RefreshToken(w http.ResponseWriter, r *http.Request) {
+	var refreshTokenInput struct {
+		RefreshToken string `json:"refreshToken"`
+	}
 
+	err := helper.ReadJSON(w, r, &refreshTokenInput)
+	if err != nil {
+		helper.BadRequest(w, r, err)
+		return
+	}
+
+	if refreshTokenInput.RefreshToken == "" {
+		helper.BadRequest(w, r, errors.New("refresh token not provided"))
+		return
+	}
+
+	claimsValid, tokenClaims := helper.VerifyJWTToken(refreshTokenInput.RefreshToken)
+	if !claimsValid {
+		helper.Unauthorized(w, r, errors.New("invalid refresh token"))
+		return
+	}
+
+	token, tokenInDB := ac.store.DB.FetchRefreshTokenFromDB(refreshTokenInput.RefreshToken, tokenClaims.ID)
+	if !tokenInDB {
+		helper.Unauthorized(w, r, errors.New("refresh token not found or expired"))
+		return
+	}
+
+	if !helper.IsTokenExpiryValid(token.ExpiresAt) {
+		helper.Unauthorized(w, r, errors.New("refresh token has expired"))
+		return
+	}
+
+	// Generate and update accessToken
+	user, err := ac.store.DB.GetUserByID(token.UserID)
+	if err != nil {
+		helper.InvalidCredential(w)
+		return
+	}
+
+	tokenDetail := &helper.TokenDetail{
+		ID:           user.ID,
+		Email:        user.Email,
+		Username:     user.Username,
+		ProfileImage: user.ProfileImage,
+		FirstName:    user.FirstName,
+		LastName:     user.LastName,
+	}
+
+	newAccessToken, tokenExpiry, err := helper.GenerateAccessToken(tokenDetail)
+	if err != nil {
+		helper.BadRequest(w, r, err)
+		return
+	}
+
+	var payload dto.RefreshTokenResponseDTO
+	// var userDto
+	payload.Error = false
+	payload.AccessToken = newAccessToken
+	payload.Expiry = tokenExpiry
+
+	err = helper.WriteJSONResponse(w, http.StatusOK, payload)
+	if err != nil {
+		helper.BadRequest(w, r, err)
+	}
 }
 
 func (ac *AuthController) Register(w http.ResponseWriter, r *http.Request) {

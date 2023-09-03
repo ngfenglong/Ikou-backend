@@ -4,16 +4,6 @@ import (
 	"time"
 )
 
-type Token struct {
-	ID           string
-	UserID       string
-	Token        string
-	ProfileImage string
-	FirstName    string
-	LastName     string `json:"firstname"`
-	Expiry       time.Time
-}
-
 type User struct {
 	ID           string `json:"id"`
 	Username     string `json:"username"`
@@ -34,4 +24,13 @@ type LoginUser struct {
 	Username string `json:"username"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
+}
+
+type RefreshToken struct {
+	ID        string
+	UserID    string
+	Token     string
+	CreatedAt string
+	UpdatedAt string
+	ExpiresAt time.Time
 }

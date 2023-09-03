@@ -14,7 +14,7 @@ func AuthRoutes(store *store.Store) chi.Router {
 	mux.Post("/login", authController.Login)
 	mux.Post("/logout", authController.Logout)
 	mux.Post("/register", authController.Register)
-	mux.Post("/refresh", authController.RefreshToken)
+	mux.Post("/refresh-token", authController.RefreshToken)
 
 	return mux
 }

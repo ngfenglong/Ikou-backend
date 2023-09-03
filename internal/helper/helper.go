@@ -70,6 +70,48 @@ func BadRequest(w http.ResponseWriter, r *http.Request, err error) error {
 	return nil
 }
 
+func Unauthorized(w http.ResponseWriter, r *http.Request, err error) error {
+	var payload struct {
+		Error   bool   `json:"error"`
+		Message string `json:"message"`
+	}
+
+	payload.Error = true
+	payload.Message = err.Error()
+
+	out, err := json.MarshalIndent(payload, "", "\t")
+	if err != nil {
+		return err
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusUnauthorized)
+	w.Write(out)
+
+	return nil
+}
+
+func InternalServerError(w http.ResponseWriter, r *http.Request, err error) error {
+	var payload struct {
+		Error   bool   `json:"error"`
+		Message string `json:"message"`
+	}
+
+	payload.Error = true
+	payload.Message = err.Error()
+
+	out, err := json.MarshalIndent(payload, "", "\t")
+	if err != nil {
+		return err
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusInternalServerError)
+	w.Write(out)
+
+	return nil
+}
+
 func InvalidCredential(w http.ResponseWriter) error {
 	var payload struct {
 		Error   bool   `json:"error"`
