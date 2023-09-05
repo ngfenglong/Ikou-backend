@@ -103,7 +103,7 @@ func (ac *AuthController) RefreshToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	claimsValid, tokenClaims := helper.VerifyJWTToken(refreshTokenInput.RefreshToken)
+	claimsValid, tokenClaims := helper.VerifyRefreshToken(refreshTokenInput.RefreshToken)
 	if !claimsValid {
 		helper.Unauthorized(w, r, errors.New("invalid refresh token"))
 		return

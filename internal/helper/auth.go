@@ -89,7 +89,7 @@ func VerifyAccessToken(tokenStr string) (bool, *TokenDetail) {
 	return false, nil
 }
 
-func VerifyJWTToken(tokenStr string) (bool, *RefreshTokenClaims) {
+func VerifyRefreshToken(tokenStr string) (bool, *RefreshTokenClaims) {
 	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
 
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
