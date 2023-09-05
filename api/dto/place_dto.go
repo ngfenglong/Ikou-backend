@@ -15,6 +15,7 @@ type PlaceDTO struct {
 	SubCategory     string       `json:"sub_category"`
 	Category        string       `json:"category"`
 	Area            string       `json:"area"`
+	Liked           bool         `json:"liked"`
 	Reviews         []*ReviewDTO `json:"reviews"`
 	CreatedAt       time.Time    `json:"-"`
 	UpdatedAt       time.Time    `json:"updated_at"`

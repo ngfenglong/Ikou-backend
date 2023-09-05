@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/ngfenglong/ikou-backend/api/store"
 	"github.com/ngfenglong/ikou-backend/internal/helper"
@@ -22,7 +23,23 @@ func NewPlaceController(store *store.Store) *PlaceController {
 }
 
 func (pc *PlaceController) GetAllPlaces(w http.ResponseWriter, r *http.Request) {
-	places, err := pc.store.DB.GetAllPlaces()
+	tokenStr := r.Header.Get("Authorization")
+
+	var tokenClaims *helper.TokenDetail
+	if tokenStr != "" {
+		tokenStr = strings.TrimPrefix(tokenStr, "Bearer ")
+		claimsValid, tempClaims := helper.VerifyAccessToken(tokenStr)
+		if claimsValid && tempClaims != nil {
+			tokenClaims = tempClaims
+		}
+	}
+
+	userID := ""
+	if tokenClaims != nil {
+		userID = tokenClaims.ID
+	}
+
+	places, err := pc.store.DB.GetAllPlaces(userID)
 	if err != nil {
 		// ToDo: do some proper error handling here
 		log.Fatalf("Failed to execute queries: %v", err)

@@ -13,7 +13,7 @@ import (
 )
 
 // #region Place API
-func (m *DBModel) GetAllPlaces() ([]*dto.PlaceDTO, error) {
+func (m *DBModel) GetAllPlaces(userID string) ([]*dto.PlaceDTO, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
@@ -23,7 +23,8 @@ func (m *DBModel) GetAllPlaces() ([]*dto.PlaceDTO, error) {
 	SELECT 
 			p.id, p.placename, p.description, p.address, p.lat, p.lon, p.imageUrl, p.averageSpending, 
 			s.decode, c.decode, a.decode, p.created_at, p.updated_at, p.created_by,
-			r.id, r.rating, r.reviewDescription, u.profileImage, r.created_at, r.updated_at, u.username
+			r.id, r.rating, r.reviewDescription, u.profileImage, r.created_at, r.updated_at, u.username, 
+			CASE WHEN lp.id IS NOT NULL THEN true ELSE false END AS liked
 		FROM 
 			Places p
 			Inner Join CodeDecodeSubcategories s on s.code = p.subCategoryCode
@@ -31,10 +32,11 @@ func (m *DBModel) GetAllPlaces() ([]*dto.PlaceDTO, error) {
 			Inner Join CodeDecodeArea a on a.code = p.areaCode
 			Left Join Reviews r on p.id = r.place_id
 			Left Join Users u on u.id = r.created_by
+			LEFT JOIN liked_places lp on p.id = lp.placeId AND lp.userId = ? 
 		ORDER BY p.id
 	`
 
-	rows, err := m.DB.QueryContext(ctx, query)
+	rows, err := m.DB.QueryContext(ctx, query, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -44,6 +46,7 @@ func (m *DBModel) GetAllPlaces() ([]*dto.PlaceDTO, error) {
 	for rows.Next() {
 		var p models.Place
 		var r models.Review
+		var liked sql.NullBool
 
 		var rID sql.NullString
 		var rRating sql.NullInt32
@@ -75,6 +78,7 @@ func (m *DBModel) GetAllPlaces() ([]*dto.PlaceDTO, error) {
 			&rCreatedAt,
 			&rUpdatedAt,
 			&rCreatedBy,
+			&liked,
 		)
 		if err != nil {
 			return nil, err
@@ -97,6 +101,8 @@ func (m *DBModel) GetAllPlaces() ([]*dto.PlaceDTO, error) {
 			r.CreatedBy = rCreatedBy.String
 			place.Reviews = append(place.Reviews, &r)
 		}
+
+		place.Liked = liked.Valid && liked.Bool
 	}
 
 	places := make([]*dto.PlaceDTO, 0, len(placesMap))
