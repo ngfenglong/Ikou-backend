@@ -423,8 +423,8 @@ func (m *DBModel) SearchPlaceByKeyword(keyword string, userID string) ([]*dto.Pl
 		SELECT 
 			p.id, p.placename, p.description, p.address, p.lat, p.lon, p.imageUrl, p.averageSpending, 
 			s.decode, c.decode, a.decode, p.created_at, p.updated_at, p.created_by,
-			r.id, r.rating, r.reviewDescription, u.profileImage, r.created_at, r.up, 
-			CASE WHEN lp.id IS NOT NULL THEN true ELSE false END AS likeddated_at, u.username
+			r.id, r.rating, r.reviewDescription, u.profileImage, r.created_at,  r.updated_at, u.username, 
+			CASE WHEN lp.id IS NOT NULL THEN true ELSE false END AS liked
 		FROM 
 			Places p
 			Inner Join CodeDecodeSubcategories s on s.code = p.subCategoryCode
