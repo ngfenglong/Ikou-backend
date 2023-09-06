@@ -6,8 +6,8 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-	"strings"
 
+	"github.com/ngfenglong/ikou-backend/api/middleware"
 	"github.com/ngfenglong/ikou-backend/api/store"
 	"github.com/ngfenglong/ikou-backend/internal/helper"
 
@@ -23,21 +23,7 @@ func NewPlaceController(store *store.Store) *PlaceController {
 }
 
 func (pc *PlaceController) GetAllPlaces(w http.ResponseWriter, r *http.Request) {
-	tokenStr := r.Header.Get("Authorization")
-
-	var tokenClaims *helper.TokenDetail
-	if tokenStr != "" {
-		tokenStr = strings.TrimPrefix(tokenStr, "Bearer ")
-		claimsValid, tempClaims := helper.VerifyAccessToken(tokenStr)
-		if claimsValid && tempClaims != nil {
-			tokenClaims = tempClaims
-		}
-	}
-
-	userID := ""
-	if tokenClaims != nil {
-		userID = tokenClaims.ID
-	}
+	userID := r.Context().Value(middleware.UserIDKey).(string)
 
 	places, err := pc.store.DB.GetAllPlaces(userID)
 	if err != nil {
@@ -56,7 +42,8 @@ func (pc *PlaceController) GetAllPlaces(w http.ResponseWriter, r *http.Request) 
 // Get place with details such as comments, liked, etc...
 func (pc *PlaceController) GetPlaceById(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
-	place, err := pc.store.DB.GetPlaceById(id)
+	userID := r.Context().Value(middleware.UserIDKey).(string)
+	place, err := pc.store.DB.GetPlaceById(id, userID)
 
 	if err != nil {
 		helper.BadRequest(w, r, err)
@@ -75,6 +62,7 @@ func (pc *PlaceController) GetPlaceById(w http.ResponseWriter, r *http.Request) 
 }
 
 func (pc *PlaceController) GetPlacesBySubCategoryCode(w http.ResponseWriter, r *http.Request) {
+	userID := r.Context().Value(middleware.UserIDKey).(string)
 	code := chi.URLParam(r, "code")
 	subCategoryCode, err := strconv.Atoi(code)
 	if err != nil {
@@ -82,7 +70,7 @@ func (pc *PlaceController) GetPlacesBySubCategoryCode(w http.ResponseWriter, r *
 		return
 	}
 
-	places, err := pc.store.DB.GetPlacesBySubCategoryCode(subCategoryCode)
+	places, err := pc.store.DB.GetPlacesBySubCategoryCode(subCategoryCode, userID)
 	if err != nil {
 		helper.BadRequest(w, r, err)
 		return
@@ -96,6 +84,7 @@ func (pc *PlaceController) GetPlacesBySubCategoryCode(w http.ResponseWriter, r *
 }
 
 func (pc *PlaceController) GetPlacesByCategory(w http.ResponseWriter, r *http.Request) {
+	userID := r.Context().Value(middleware.UserIDKey).(string)
 	category := chi.URLParam(r, "category")
 
 	if category == "" {
@@ -103,7 +92,7 @@ func (pc *PlaceController) GetPlacesByCategory(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	places, err := pc.store.DB.GetPlacesByCategoryCode(category)
+	places, err := pc.store.DB.GetPlacesByCategoryCode(category, userID)
 	if err != nil {
 		helper.BadRequest(w, r, err)
 		return
@@ -117,6 +106,7 @@ func (pc *PlaceController) GetPlacesByCategory(w http.ResponseWriter, r *http.Re
 }
 
 func (pc *PlaceController) SearchPlacesByKeyword(w http.ResponseWriter, r *http.Request) {
+	userID := r.Context().Value(middleware.UserIDKey).(string)
 	var searchPlaceRequestDto struct {
 		Keyword string `json:"keyword"`
 	}
@@ -132,7 +122,7 @@ func (pc *PlaceController) SearchPlacesByKeyword(w http.ResponseWriter, r *http.
 		return
 	}
 
-	places, err := pc.store.DB.SearchPlaceByKeyword(searchPlaceRequestDto.Keyword)
+	places, err := pc.store.DB.SearchPlaceByKeyword(searchPlaceRequestDto.Keyword, userID)
 	if err != nil {
 		helper.BadRequest(w, r, err)
 		return
