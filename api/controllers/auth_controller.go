@@ -94,29 +94,29 @@ func (ac *AuthController) RefreshToken(w http.ResponseWriter, r *http.Request) {
 
 	err := helper.ReadJSON(w, r, &refreshTokenInput)
 	if err != nil {
-		helper.BadRequest(w, r, err)
+		helper.BadRequest(w, r, errors.New("we encountered an issue processing your request, please login agin"))
 		return
 	}
 
 	if refreshTokenInput.RefreshToken == "" {
-		helper.BadRequest(w, r, errors.New("refresh token not provided"))
+		helper.BadRequest(w, r, errors.New("we encountered an issue processing your request, please try again or login if the problem persists"))
 		return
 	}
 
 	claimsValid, tokenClaims := helper.VerifyRefreshToken(refreshTokenInput.RefreshToken)
 	if !claimsValid {
-		helper.Unauthorized(w, r, errors.New("invalid refresh token"))
+		helper.BadRequest(w, r, errors.New("your session appears to be invalid or has expired, please login again"))
 		return
 	}
 
 	token, tokenInDB := ac.store.DB.FetchRefreshTokenFromDB(refreshTokenInput.RefreshToken, tokenClaims.ID)
 	if !tokenInDB {
-		helper.Unauthorized(w, r, errors.New("refresh token not found or expired"))
+		helper.BadRequest(w, r, errors.New("your session appears to be invalid or has expired, please login again"))
 		return
 	}
 
 	if !helper.IsTokenExpiryValid(token.ExpiresAt) {
-		helper.Unauthorized(w, r, errors.New("refresh token has expired"))
+		helper.BadRequest(w, r, errors.New("your session appears to be invalid or has expired, please login again"))
 		return
 	}
 
