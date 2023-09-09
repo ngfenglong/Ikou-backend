@@ -11,12 +11,14 @@ func (m *DBModel) GetAllCategory() ([]*models.CodeDecodeCategory, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	var categories []*models.CodeDecodeCategory
+	categoriesMap := make(map[string]*models.CodeDecodeCategory)
 
 	query := `
-		Select id, code, decode, isActive, created_at, updated_at 
-		FROM CodeDecodeCategories 
-		WHERE isActive = 1
+		Select c.id, c.code, c.decode, c.isActive, c.created_at, c.updated_at, 
+		s.id, s.code, s.decode,s.isActive, s.created_at, s.updated_at  
+		FROM CodeDecodeCategories c
+		INNER JOIN CodeDecodeSubCategories s ON c.code = s.categoryCode
+		WHERE c.isActive = 1 AND s.isActive = 1
 	`
 	rows, err := m.DB.QueryContext(ctx, query)
 	if err != nil {
@@ -27,6 +29,8 @@ func (m *DBModel) GetAllCategory() ([]*models.CodeDecodeCategory, error) {
 
 	for rows.Next() {
 		var c models.CodeDecodeCategory
+		var s models.CodeDecodeSubCategory
+
 		err = rows.Scan(
 			&c.ID,
 			&c.Code,
@@ -34,13 +38,29 @@ func (m *DBModel) GetAllCategory() ([]*models.CodeDecodeCategory, error) {
 			&c.IsActive,
 			&c.CreatedAt,
 			&c.UpdatedAt,
+			&s.ID,
+			&s.Code,
+			&s.Decode,
+			&s.IsActive,
+			&s.CreatedAt,
+			&s.UpdatedAt,
 		)
 
 		if err != nil {
 			return nil, err
 		}
 
-		categories = append(categories, &c)
+		category, exists := categoriesMap[c.ID]
+		if !exists {
+			category = &c
+			category.SubCategories = []*models.CodeDecodeSubCategory{}
+			categoriesMap[c.ID] = category
+		}
+		category.SubCategories = append(category.SubCategories, &s)
+	}
+	categories := make([]*models.CodeDecodeCategory, 0, len(categoriesMap))
+	for _, category := range categoriesMap {
+		categories = append(categories, category)
 	}
 
 	return categories, nil

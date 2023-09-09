@@ -5,12 +5,13 @@ import (
 )
 
 type CodeDecodeCategory struct {
-	ID        string    `json:"id"`
-	Code      int       `json:"code"`
-	Decode    string    `json:"decode"`
-	IsActive  bool      `json:"is_active"`
-	CreatedAt time.Time `json:"-"`
-	UpdatedAt time.Time `json:"-"`
+	ID            string                   `json:"id"`
+	Code          int                      `json:"code"`
+	Decode        string                   `json:"decode"`
+	IsActive      bool                     `json:"is_active"`
+	SubCategories []*CodeDecodeSubCategory `json:"sub_cateogries"`
+	CreatedAt     time.Time                `json:"-"`
+	UpdatedAt     time.Time                `json:"-"`
 }
 
 type CodeDecodeSubCategory struct {

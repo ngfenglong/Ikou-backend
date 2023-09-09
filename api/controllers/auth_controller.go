@@ -206,7 +206,6 @@ func (ac *AuthController) Register(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		helper.BadRequest(w, r, err)
 	}
-
 }
 
 func (ac *AuthController) Logout(w http.ResponseWriter, r *http.Request) {
@@ -234,5 +233,4 @@ func (ac *AuthController) Logout(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		helper.BadRequest(w, r, err)
 	}
-
 }
