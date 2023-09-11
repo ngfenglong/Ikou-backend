@@ -9,7 +9,7 @@ type CodeDecodeCategory struct {
 	Code          int                      `json:"code"`
 	Decode        string                   `json:"decode"`
 	IsActive      bool                     `json:"is_active"`
-	SubCategories []*CodeDecodeSubCategory `json:"sub_cateogries"`
+	SubCategories []*CodeDecodeSubCategory `json:"sub_categories"`
 	CreatedAt     time.Time                `json:"-"`
 	UpdatedAt     time.Time                `json:"-"`
 }
