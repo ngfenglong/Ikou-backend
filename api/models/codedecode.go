@@ -23,3 +23,12 @@ type CodeDecodeSubCategory struct {
 	CreatedAt    time.Time `json:"-"`
 	UpdatedAt    time.Time `json:"-"`
 }
+
+type CodeDecodeArea struct {
+	ID        string    `json:"id"`
+	Code      int       `json:"code"`
+	Decode    string    `json:"decode"`
+	IsActive  bool      `json:"is_active"`
+	CreatedAt time.Time `json:"-"`
+	UpdatedAt time.Time `json:"-"`
+}

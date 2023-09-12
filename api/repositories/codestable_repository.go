@@ -146,3 +146,42 @@ func (m *DBModel) GetAllSubCategoryByCategoryCode(categoryCode int) ([]*models.C
 
 	return subCategories, nil
 }
+
+func (m *DBModel) GetAllAreas() ([]*models.CodeDecodeArea, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var areas []*models.CodeDecodeArea
+
+	query := `
+				Select id, code, decode, isActive, created_at, updated_at
+    			From CodeDecodeArea
+			`
+
+	rows, err := m.DB.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+		var a models.CodeDecodeArea
+
+		err = rows.Scan(
+			&a.ID,
+			&a.Code,
+			&a.Decode,
+			&a.IsActive,
+			&a.CreatedAt,
+			&a.UpdatedAt,
+		)
+
+		if err != nil {
+			return nil, err
+		}
+
+		areas = append(areas, &a)
+	}
+
+	return areas, nil
+}
