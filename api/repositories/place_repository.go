@@ -514,4 +514,21 @@ func (m *DBModel) SearchPlaceByKeyword(keyword string, userID string) ([]*dto.Pl
 	return places, nil
 }
 
+func (m *DBModel) AddPlaceRequest(pr dto.PlaceRequestDto) error {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+	defer cancel()
+
+	stmt := `
+		Insert into Place_Requests (placeName, description, address, imageUrl, subCategoryCode, areaCode, created_by) 
+		VALUE (?,?,?,?,?,?,?)
+	`
+
+	_, err := m.DB.ExecContext(ctx, stmt, pr.Name, pr.Description, pr.Address, pr.ImageUrl, pr.SubCategory, pr.Area, pr.CreatedBy)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 //	#endregion

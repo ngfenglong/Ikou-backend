@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/ngfenglong/ikou-backend/api/dto"
 	"github.com/ngfenglong/ikou-backend/api/middleware"
 	"github.com/ngfenglong/ikou-backend/api/store"
 	"github.com/ngfenglong/ikou-backend/internal/helper"
@@ -136,4 +137,35 @@ func (pc *PlaceController) SearchPlacesByKeyword(w http.ResponseWriter, r *http.
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(out)
+}
+
+func (pc *PlaceController) AddPlaceRequest(w http.ResponseWriter, r *http.Request) {
+	userName := r.Context().Value(middleware.UserNameKey).(string)
+	if userName == "" {
+		helper.InvalidCredential(w)
+	}
+
+	var npr dto.PlaceRequestDto
+	err := helper.ReadJSON(w, r, &npr)
+	if err != nil {
+		helper.BadRequest(w, r, err)
+		return
+	}
+
+	npr.CreatedBy = userName
+
+	err = pc.store.DB.AddPlaceRequest(npr)
+	if err != nil {
+		helper.BadRequest(w, r, err)
+		return
+	}
+
+	var payload dto.SuccessResponseDto
+	payload.Error = false
+	payload.Message = "Place Request submitted successfully"
+
+	err = helper.WriteJSONResponse(w, http.StatusCreated, payload)
+	if err != nil {
+		helper.BadRequest(w, r, err)
+	}
 }

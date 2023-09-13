@@ -11,6 +11,7 @@ import (
 type contextKey string
 
 const UserIDKey contextKey = "userID"
+const UserNameKey contextKey = "userName"
 
 func ExtractTokenMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -25,14 +26,16 @@ func ExtractTokenMiddleware(next http.HandlerFunc) http.HandlerFunc {
 			}
 		}
 
-	
 		userID := ""
+		userName := ""
 		if tokenClaims != nil {
 			userID = tokenClaims.ID
+			userName = tokenClaims.Username
 		}
 
 		// Storing the userID in the request's context
 		ctx := context.WithValue(r.Context(), UserIDKey, userID)
+		ctx = context.WithValue(ctx, UserNameKey, userName)
 
 		next.ServeHTTP(w, r.WithContext(ctx))
 	}
