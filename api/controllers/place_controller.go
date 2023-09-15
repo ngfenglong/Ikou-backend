@@ -169,3 +169,43 @@ func (pc *PlaceController) AddPlaceRequest(w http.ResponseWriter, r *http.Reques
 		helper.BadRequest(w, r, err)
 	}
 }
+
+func (pc *PlaceController) ToggleLike(w http.ResponseWriter, r *http.Request) {
+	userId := r.Context().Value(middleware.UserIDKey).(string)
+	if userId == "" {
+		helper.InvalidCredential(w)
+	}
+
+	placeId := chi.URLParam(r, "placeId")
+
+	// Check if liked_places have records
+	liked, err := pc.store.DB.HasUserLikedPlace(userId, placeId)
+	if err != nil {
+		helper.BadRequest(w, r, err)
+		return
+	}
+
+	payloadMessage := ""
+	if liked {
+		err = pc.store.DB.RemoveUserLikeFromPlace(userId, placeId)
+		payloadMessage = "Removed like Successfully"
+	} else {
+		err = pc.store.DB.AddUserLikeToPlace(userId, placeId)
+		payloadMessage = "Liked successfully"
+	}
+
+	if err != nil {
+		helper.BadRequest(w, r, err)
+		return
+	}
+
+	var payload dto.SuccessResponseDto
+	payload.Error = false
+	payload.Message = payloadMessage
+
+	err = helper.WriteJSONResponse(w, http.StatusOK, payload)
+	if err != nil {
+		helper.BadRequest(w, r, err)
+	}
+
+}

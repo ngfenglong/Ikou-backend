@@ -531,4 +531,57 @@ func (m *DBModel) AddPlaceRequest(pr dto.PlaceRequestDto) error {
 	return nil
 }
 
+func (m *DBModel) HasUserLikedPlace(userID string, placeID string) (bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	checkLikedStmt := `
+		Select Count(*) 
+		From liked_places 
+		WHERE userId = ? AND placeId = ?  
+	`
+
+	row := m.DB.QueryRowContext(ctx, checkLikedStmt, userID, placeID)
+
+	var count int
+	err := row.Scan(&count)
+	if err != nil {
+		return false, err
+	}
+
+	if count > 0 {
+		return true, nil
+	}
+
+	return false, nil
+}
+
+func (m *DBModel) RemoveUserLikeFromPlace(userID string, placeID string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	stmt := `Delete From liked_places WHERE userId = ? AND placeId = ?`
+
+	_, err := m.DB.ExecContext(ctx, stmt, userID, placeID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *DBModel) AddUserLikeToPlace(userID string, placeID string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	stmt := `INSERT into liked_places (userId, placeId, created_by) VALUES (?,?,?)`
+
+	_, err := m.DB.ExecContext(ctx, stmt, userID, placeID, userID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 //	#endregion

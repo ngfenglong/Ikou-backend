@@ -17,7 +17,10 @@ func PlaceRoutes(store *store.Store) chi.Router {
 	mux.Get("/getPlacesBySubCategory/{code}", middleware.ExtractTokenMiddleware(placeController.GetPlacesBySubCategoryCode))
 	mux.Get("/getPlacesByCategory/{category}", middleware.ExtractTokenMiddleware(placeController.GetPlacesByCategory))
 	mux.Post("/searchPlaceByKeyword", middleware.ExtractTokenMiddleware(placeController.SearchPlacesByKeyword))
+
 	mux.Post("/addPlaceRequest", middleware.ExtractTokenMiddleware(placeController.AddPlaceRequest))
+
+	mux.Get("/{placeId}/toggle-like", middleware.ExtractTokenMiddleware(placeController.ToggleLike))
 
 	return mux
 }
