@@ -27,6 +27,7 @@ func MapToPlaceDTO(place *models.Place) *dto.PlaceDTO {
 		ImageUrl:        place.ImageUrl,
 		SubCategory:     place.SubCategory,
 		Category:        place.Category,
+		Liked:           place.Liked,
 		Area:            place.Area,
 		Reviews:         MapToReviewsDTO(place.Reviews),
 		CreatedAt:       place.CreatedAt,

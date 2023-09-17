@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/ngfenglong/ikou-backend/api/dto"
@@ -53,7 +54,7 @@ func (ac *AuthController) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	refreshToken, refreshExpiry, err := helper.GenerateRefreshToken(tokenDetail)
+	refreshToken, refreshExpiry, err := helper.GenerateRefreshToken(tokenDetail.ID)
 	if err != nil {
 		helper.BadRequest(w, r, err)
 		return
@@ -87,7 +88,70 @@ func (ac *AuthController) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ac *AuthController) RefreshToken(w http.ResponseWriter, r *http.Request) {
+	var refreshTokenInput struct {
+		RefreshToken string `json:"refreshToken"`
+	}
 
+	err := helper.ReadJSON(w, r, &refreshTokenInput)
+	if err != nil {
+		helper.BadRequest(w, r, errors.New("we encountered an issue processing your request, please login agin"))
+		return
+	}
+
+	if refreshTokenInput.RefreshToken == "" {
+		helper.BadRequest(w, r, errors.New("we encountered an issue processing your request, please try again or login if the problem persists"))
+		return
+	}
+
+	claimsValid, tokenClaims := helper.VerifyRefreshToken(refreshTokenInput.RefreshToken)
+	if !claimsValid {
+		helper.BadRequest(w, r, errors.New("your session appears to be invalid or has expired, please login again"))
+		return
+	}
+
+	token, tokenInDB := ac.store.DB.FetchRefreshTokenFromDB(refreshTokenInput.RefreshToken, tokenClaims.ID)
+	if !tokenInDB {
+		helper.BadRequest(w, r, errors.New("your session appears to be invalid or has expired, please login again"))
+		return
+	}
+
+	if !helper.IsTokenExpiryValid(token.ExpiresAt) {
+		helper.BadRequest(w, r, errors.New("your session appears to be invalid or has expired, please login again"))
+		return
+	}
+
+	// Generate and update accessToken
+	user, err := ac.store.DB.GetUserByID(token.UserID)
+	if err != nil {
+		helper.InvalidCredential(w)
+		return
+	}
+
+	tokenDetail := &helper.TokenDetail{
+		ID:           user.ID,
+		Email:        user.Email,
+		Username:     user.Username,
+		ProfileImage: user.ProfileImage,
+		FirstName:    user.FirstName,
+		LastName:     user.LastName,
+	}
+
+	newAccessToken, tokenExpiry, err := helper.GenerateAccessToken(tokenDetail)
+	if err != nil {
+		helper.BadRequest(w, r, err)
+		return
+	}
+
+	var payload dto.RefreshTokenResponseDTO
+	// var userDto
+	payload.Error = false
+	payload.AccessToken = newAccessToken
+	payload.Expiry = tokenExpiry
+
+	err = helper.WriteJSONResponse(w, http.StatusOK, payload)
+	if err != nil {
+		helper.BadRequest(w, r, err)
+	}
 }
 
 func (ac *AuthController) Register(w http.ResponseWriter, r *http.Request) {
@@ -142,7 +206,6 @@ func (ac *AuthController) Register(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		helper.BadRequest(w, r, err)
 	}
-
 }
 
 func (ac *AuthController) Logout(w http.ResponseWriter, r *http.Request) {
@@ -170,5 +233,4 @@ func (ac *AuthController) Logout(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		helper.BadRequest(w, r, err)
 	}
-
 }

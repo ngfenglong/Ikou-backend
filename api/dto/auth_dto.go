@@ -36,3 +36,10 @@ type RegisterFormInputDTO struct {
 	ProfileImage string `json:"profile_image"`
 	Country      string `json:"country"`
 }
+
+type RefreshTokenResponseDTO struct {
+	Error        bool      `json:"error"`
+	Message      string    `json:"message"`
+	AccessToken  string    `json:"access_token"`
+	Expiry       time.Time `json:"expiry"`
+}

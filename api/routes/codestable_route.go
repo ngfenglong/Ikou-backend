@@ -15,6 +15,7 @@ func CodestableRoutes(store *store.Store) chi.Router {
 	mux.Get("/codeDecodeCategories", codestableController.GetAllCategories)
 	mux.Get("/codeDecodeSubCategories", codestableController.GetAllSubCategories)
 	mux.Get("/codeDecodeSubCategories/{code}", codestableController.GetSubCategoriesByCategory)
+	mux.Get("/codeDecodeAreas", codestableController.GetAllAreas)
 
 	return mux
 }

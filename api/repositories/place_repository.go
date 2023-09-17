@@ -13,7 +13,7 @@ import (
 )
 
 // #region Place API
-func (m *DBModel) GetAllPlaces() ([]*dto.PlaceDTO, error) {
+func (m *DBModel) GetAllPlaces(userID string) ([]*dto.PlaceDTO, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
@@ -23,7 +23,8 @@ func (m *DBModel) GetAllPlaces() ([]*dto.PlaceDTO, error) {
 	SELECT 
 			p.id, p.placename, p.description, p.address, p.lat, p.lon, p.imageUrl, p.averageSpending, 
 			s.decode, c.decode, a.decode, p.created_at, p.updated_at, p.created_by,
-			r.id, r.rating, r.reviewDescription, u.profileImage, r.created_at, r.updated_at, u.username
+			r.id, r.rating, r.reviewDescription, u.profileImage, r.created_at, r.updated_at, u.username, 
+			CASE WHEN lp.id IS NOT NULL THEN true ELSE false END AS liked
 		FROM 
 			Places p
 			Inner Join CodeDecodeSubcategories s on s.code = p.subCategoryCode
@@ -31,10 +32,11 @@ func (m *DBModel) GetAllPlaces() ([]*dto.PlaceDTO, error) {
 			Inner Join CodeDecodeArea a on a.code = p.areaCode
 			Left Join Reviews r on p.id = r.place_id
 			Left Join Users u on u.id = r.created_by
+			LEFT JOIN liked_places lp on p.id = lp.placeId AND lp.userId = ? 
 		ORDER BY p.id
 	`
 
-	rows, err := m.DB.QueryContext(ctx, query)
+	rows, err := m.DB.QueryContext(ctx, query, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -44,6 +46,7 @@ func (m *DBModel) GetAllPlaces() ([]*dto.PlaceDTO, error) {
 	for rows.Next() {
 		var p models.Place
 		var r models.Review
+		var liked sql.NullBool
 
 		var rID sql.NullString
 		var rRating sql.NullInt32
@@ -75,6 +78,7 @@ func (m *DBModel) GetAllPlaces() ([]*dto.PlaceDTO, error) {
 			&rCreatedAt,
 			&rUpdatedAt,
 			&rCreatedBy,
+			&liked,
 		)
 		if err != nil {
 			return nil, err
@@ -97,6 +101,8 @@ func (m *DBModel) GetAllPlaces() ([]*dto.PlaceDTO, error) {
 			r.CreatedBy = rCreatedBy.String
 			place.Reviews = append(place.Reviews, &r)
 		}
+
+		place.Liked = liked.Valid && liked.Bool
 	}
 
 	places := make([]*dto.PlaceDTO, 0, len(placesMap))
@@ -107,23 +113,26 @@ func (m *DBModel) GetAllPlaces() ([]*dto.PlaceDTO, error) {
 	return places, nil
 }
 
-func (m *DBModel) GetPlaceById(id string) (*dto.PlaceDTO, error) {
+func (m *DBModel) GetPlaceById(id string, userID string) (*dto.PlaceDTO, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
 	var place models.Place
+	var liked sql.NullBool
 
 	row := m.DB.QueryRowContext(ctx, `
 		SELECT 
 			p.id, p.placename, p.description, p.address, p.lat, p.lon, p.imageUrl, p.averageSpending, 
-			s.decode, c.decode, a.decode, p.created_at, p.updated_at, p.created_by
+			s.decode, c.decode, a.decode, p.created_at, p.updated_at, p.created_by, 
+			CASE WHEN lp.id IS NOT NULL THEN true ELSE false END AS liked
 		FROM 
 			Places p
 			Inner Join CodeDecodeSubcategories s on s.code = p.subCategoryCode
 			Inner Join CodeDecodeCategories c on c.code = s.categorycode
 			Inner Join CodeDecodeArea a on a.code = p.areaCode
+			LEFT JOIN liked_places lp on p.id = lp.placeId AND lp.userId = ? 
 		WHERE 
-			p.id = ?`, id)
+			p.id = ?`, userID, id)
 
 	err := row.Scan(
 		&place.ID,
@@ -140,6 +149,7 @@ func (m *DBModel) GetPlaceById(id string) (*dto.PlaceDTO, error) {
 		&place.CreatedAt,
 		&place.UpdatedAt,
 		&place.CreatedBy,
+		&liked,
 	)
 
 	if err != nil {
@@ -192,10 +202,12 @@ func (m *DBModel) GetPlaceById(id string) (*dto.PlaceDTO, error) {
 		place.Reviews = reviews
 	}
 
+	place.Liked = liked.Valid && liked.Bool
+
 	return mapper.MapToPlaceDTO(&place), nil
 }
 
-func (m *DBModel) GetPlacesByCategoryCode(category string) ([]*dto.PlaceDTO, error) {
+func (m *DBModel) GetPlacesByCategoryCode(category string, userID string) ([]*dto.PlaceDTO, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
@@ -205,18 +217,20 @@ func (m *DBModel) GetPlacesByCategoryCode(category string) ([]*dto.PlaceDTO, err
 		SELECT 
 			p.id, p.placename, p.description, p.address, p.lat, p.lon, p.imageUrl, p.averageSpending, 
 			s.decode, c.decode, a.decode, p.created_at, p.updated_at, p.created_by,
-			r.id, r.rating, r.reviewDescription, u.profileImage, r.created_at, r.updated_at, u.username
+			r.id, r.rating, r.reviewDescription, u.profileImage, r.created_at, r.updated_at, u.username, 
+			CASE WHEN lp.id IS NOT NULL THEN true ELSE false END AS liked
 		FROM Places p
 		Inner Join CodeDecodeSubcategories s on s.code = p.subCategoryCode 
 		INNER JOIN CodeDecodeCategories c on c.code = s.categoryCode
 		Inner Join CodeDecodeArea a on a.code = p.areaCode
 		Left Join Reviews r on p.id = r.place_id
 		Left Join Users u on u.id = r.created_by
+		LEFT JOIN liked_places lp on p.id = lp.placeId AND lp.userId = ? 
 		WHERE c.decode = ?
 		Order by p.id
 	`
 
-	rows, err := m.DB.QueryContext(ctx, query, category)
+	rows, err := m.DB.QueryContext(ctx, query, userID, category)
 
 	if err != nil {
 		return nil, err
@@ -227,6 +241,7 @@ func (m *DBModel) GetPlacesByCategoryCode(category string) ([]*dto.PlaceDTO, err
 	for rows.Next() {
 		var p models.Place
 		var r models.Review
+		var liked sql.NullBool
 
 		var rID sql.NullString
 		var rRating sql.NullInt32
@@ -258,6 +273,7 @@ func (m *DBModel) GetPlacesByCategoryCode(category string) ([]*dto.PlaceDTO, err
 			&rCreatedAt,
 			&rUpdatedAt,
 			&rCreatedBy,
+			&liked,
 		)
 
 		if err != nil {
@@ -281,6 +297,8 @@ func (m *DBModel) GetPlacesByCategoryCode(category string) ([]*dto.PlaceDTO, err
 			r.CreatedBy = rCreatedBy.String
 			place.Reviews = append(place.Reviews, &r)
 		}
+
+		place.Liked = liked.Valid && liked.Bool
 	}
 
 	places := make([]*dto.PlaceDTO, 0, len(placesMap))
@@ -291,7 +309,7 @@ func (m *DBModel) GetPlacesByCategoryCode(category string) ([]*dto.PlaceDTO, err
 	return places, nil
 }
 
-func (m *DBModel) GetPlacesBySubCategoryCode(code int) ([]*dto.PlaceDTO, error) {
+func (m *DBModel) GetPlacesBySubCategoryCode(code int, userID string) ([]*dto.PlaceDTO, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
@@ -301,7 +319,8 @@ func (m *DBModel) GetPlacesBySubCategoryCode(code int) ([]*dto.PlaceDTO, error) 
 		SELECT 
 		p.id, p.placename, p.description, p.address, p.lat, p.lon, p.imageUrl, p.averageSpending, 
 		s.decode, c.decode, a.decode, p.created_at, p.updated_at, p.created_by,
-		r.id, r.rating, r.reviewDescription, u.profileImage, r.created_at, r.updated_at, u.username
+		r.id, r.rating, r.reviewDescription, u.profileImage, r.created_at, r.updated_at, u.username, 
+		CASE WHEN lp.id IS NOT NULL THEN true ELSE false END AS liked
 	FROM 
 		Places p
 		Inner Join CodeDecodeSubcategories s on s.code = p.subCategoryCode
@@ -309,11 +328,12 @@ func (m *DBModel) GetPlacesBySubCategoryCode(code int) ([]*dto.PlaceDTO, error) 
 		Inner Join CodeDecodeArea a on a.code = p.areaCode
 		Left Join Reviews r on p.id = r.place_id
 		Left Join Users u on u.id = r.created_by
+		LEFT JOIN liked_places lp on p.id = lp.placeId AND lp.userId = ? 
 	WHERE subCategoryCode = ?
 	ORDER BY p.id
 	`
 
-	rows, err := m.DB.QueryContext(ctx, query, code)
+	rows, err := m.DB.QueryContext(ctx, query, userID, code)
 
 	if err != nil {
 		return nil, err
@@ -324,6 +344,7 @@ func (m *DBModel) GetPlacesBySubCategoryCode(code int) ([]*dto.PlaceDTO, error) 
 	for rows.Next() {
 		var p models.Place
 		var r models.Review
+		var liked sql.NullBool
 
 		var rID sql.NullString
 		var rRating sql.NullInt32
@@ -355,6 +376,7 @@ func (m *DBModel) GetPlacesBySubCategoryCode(code int) ([]*dto.PlaceDTO, error) 
 			&rCreatedAt,
 			&rUpdatedAt,
 			&rCreatedBy,
+			&liked,
 		)
 		if err != nil {
 			return nil, err
@@ -377,6 +399,7 @@ func (m *DBModel) GetPlacesBySubCategoryCode(code int) ([]*dto.PlaceDTO, error) 
 			r.CreatedBy = rCreatedBy.String
 			place.Reviews = append(place.Reviews, &r)
 		}
+		place.Liked = liked.Valid && liked.Bool
 	}
 
 	places := make([]*dto.PlaceDTO, 0, len(placesMap))
@@ -387,7 +410,7 @@ func (m *DBModel) GetPlacesBySubCategoryCode(code int) ([]*dto.PlaceDTO, error) 
 	return places, nil
 }
 
-func (m *DBModel) SearchPlaceByKeyword(keyword string) ([]*dto.PlaceDTO, error) {
+func (m *DBModel) SearchPlaceByKeyword(keyword string, userID string) ([]*dto.PlaceDTO, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
@@ -400,7 +423,8 @@ func (m *DBModel) SearchPlaceByKeyword(keyword string) ([]*dto.PlaceDTO, error) 
 		SELECT 
 			p.id, p.placename, p.description, p.address, p.lat, p.lon, p.imageUrl, p.averageSpending, 
 			s.decode, c.decode, a.decode, p.created_at, p.updated_at, p.created_by,
-			r.id, r.rating, r.reviewDescription, u.profileImage, r.created_at, r.updated_at, u.username
+			r.id, r.rating, r.reviewDescription, u.profileImage, r.created_at,  r.updated_at, u.username, 
+			CASE WHEN lp.id IS NOT NULL THEN true ELSE false END AS liked
 		FROM 
 			Places p
 			Inner Join CodeDecodeSubcategories s on s.code = p.subCategoryCode
@@ -408,10 +432,11 @@ func (m *DBModel) SearchPlaceByKeyword(keyword string) ([]*dto.PlaceDTO, error) 
 			Inner Join CodeDecodeArea a on a.code = p.areaCode
 			Left Join Reviews r on p.id = r.place_id
 			Left Join Users u on u.id = r.created_by
+			LEFT JOIN liked_places lp on p.id = lp.placeId AND lp.userId = ? 
 		WHERE p.address like ? OR p.placename like ?
 	`
 
-	rows, err := m.DB.QueryContext(ctx, query, addressKeyword, placenameKeyword)
+	rows, err := m.DB.QueryContext(ctx, query, userID, addressKeyword, placenameKeyword)
 
 	if err != nil {
 		return nil, err
@@ -422,6 +447,7 @@ func (m *DBModel) SearchPlaceByKeyword(keyword string) ([]*dto.PlaceDTO, error) 
 	for rows.Next() {
 		var p models.Place
 		var r models.Review
+		var liked sql.NullBool
 
 		var rID sql.NullString
 		var rRating sql.NullInt32
@@ -453,6 +479,7 @@ func (m *DBModel) SearchPlaceByKeyword(keyword string) ([]*dto.PlaceDTO, error) 
 			&rCreatedAt,
 			&rUpdatedAt,
 			&rCreatedBy,
+			&liked,
 		)
 		if err != nil {
 			return nil, err
@@ -475,6 +502,8 @@ func (m *DBModel) SearchPlaceByKeyword(keyword string) ([]*dto.PlaceDTO, error) 
 			r.CreatedBy = rCreatedBy.String
 			place.Reviews = append(place.Reviews, &r)
 		}
+
+		place.Liked = liked.Valid && liked.Bool
 	}
 
 	places := make([]*dto.PlaceDTO, 0, len(placesMap))
@@ -483,6 +512,76 @@ func (m *DBModel) SearchPlaceByKeyword(keyword string) ([]*dto.PlaceDTO, error) 
 	}
 
 	return places, nil
+}
+
+func (m *DBModel) AddPlaceRequest(pr dto.PlaceRequestDto) error {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+	defer cancel()
+
+	stmt := `
+		Insert into Place_Requests (placeName, description, address, imageUrl, subCategoryCode, areaCode, created_by) 
+		VALUE (?,?,?,?,?,?,?)
+	`
+
+	_, err := m.DB.ExecContext(ctx, stmt, pr.Name, pr.Description, pr.Address, pr.ImageUrl, pr.SubCategory, pr.Area, pr.CreatedBy)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *DBModel) HasUserLikedPlace(userID string, placeID string) (bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	checkLikedStmt := `
+		Select Count(*) 
+		From liked_places 
+		WHERE userId = ? AND placeId = ?  
+	`
+
+	row := m.DB.QueryRowContext(ctx, checkLikedStmt, userID, placeID)
+
+	var count int
+	err := row.Scan(&count)
+	if err != nil {
+		return false, err
+	}
+
+	if count > 0 {
+		return true, nil
+	}
+
+	return false, nil
+}
+
+func (m *DBModel) RemoveUserLikeFromPlace(userID string, placeID string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	stmt := `Delete From liked_places WHERE userId = ? AND placeId = ?`
+
+	_, err := m.DB.ExecContext(ctx, stmt, userID, placeID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *DBModel) AddUserLikeToPlace(userID string, placeID string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	stmt := `INSERT into liked_places (userId, placeId, created_by) VALUES (?,?,?)`
+
+	_, err := m.DB.ExecContext(ctx, stmt, userID, placeID, userID)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 //	#endregion

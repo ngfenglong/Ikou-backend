@@ -67,3 +67,17 @@ func (cc *CodestableController) GetSubCategoriesByCategory(w http.ResponseWriter
 		return
 	}
 }
+
+func (cc *CodestableController) GetAllAreas(w http.ResponseWriter, r *http.Request) {
+	areas, err := cc.store.DB.GetAllAreas()
+	if err != nil {
+		log.Fatalf("Failed to execute queries: %v", err)
+		return
+	}
+
+	err = helper.WriteJSONResponse(w, http.StatusOK, areas)
+	if err != nil {
+		log.Fatalf("Failed to convert to json: %v", err)
+		return
+	}
+}

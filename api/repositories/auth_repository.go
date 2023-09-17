@@ -8,6 +8,35 @@ import (
 	"github.com/ngfenglong/ikou-backend/api/models"
 )
 
+func (m *DBModel) GetUserByID(userID string) (*models.User, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var u models.User
+	row := m.DB.QueryRowContext(ctx, `
+		SELECT id, username, email, password, firstname, lastname, country, profileImage
+		FROM Users
+		WHERE id = ?
+	`, userID)
+
+	err := row.Scan(
+		&u.ID,
+		&u.Username,
+		&u.Email,
+		&u.Password,
+		&u.FirstName,
+		&u.LastName,
+		&u.Country,
+		&u.ProfileImage,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &u, nil
+}
+
 func (m *DBModel) GetUserByUsername(username string) (*models.User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -42,8 +71,8 @@ func (m *DBModel) InsertToken(userId string, refreshToken string, expiresAt time
 	defer cancel()
 
 	// delete existing tokens
-	stmt := `Delete from RefreshTokens where userId = ?`
-	_, err := m.DB.ExecContext(ctx, stmt, userId)
+	stmt := `Delete from RefreshTokens where userId = ? and expires_at < ?`
+	_, err := m.DB.ExecContext(ctx, stmt, userId, time.Now())
 	if err != nil {
 		return err
 	}
@@ -59,7 +88,6 @@ func (m *DBModel) InsertToken(userId string, refreshToken string, expiresAt time
 	}
 
 	return nil
-
 }
 
 func (m *DBModel) RegisterUser(r dto.RegisterFormInputDTO) error {
@@ -134,4 +162,32 @@ func (m *DBModel) DeleteToken(refreshToken string) error {
 	}
 
 	return nil
+}
+
+func (m *DBModel) FetchRefreshTokenFromDB(tokenStr string, userID string) (*models.RefreshToken, bool) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var token models.RefreshToken
+
+	stmt := `
+		Select id, userId, token, expires_at
+		FROM refreshtokens
+		WHERE token = ? 
+		AND userID = ?
+	`
+	row := m.DB.QueryRowContext(ctx, stmt, tokenStr, userID)
+
+	err := row.Scan(
+		&token.ID,
+		&token.UserID,
+		&token.Token,
+		&token.ExpiresAt,
+	)
+
+	if err != nil {
+		return nil, false
+	}
+
+	return &token, true
 }
