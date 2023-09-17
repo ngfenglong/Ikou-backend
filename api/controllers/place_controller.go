@@ -178,7 +178,7 @@ func (pc *PlaceController) ToggleLike(w http.ResponseWriter, r *http.Request) {
 
 	placeId := chi.URLParam(r, "placeId")
 
-	// Check if liked_places have records
+	// Check if Liked_Places have records
 	liked, err := pc.store.DB.HasUserLikedPlace(userId, placeId)
 	if err != nil {
 		helper.BadRequest(w, r, err)
