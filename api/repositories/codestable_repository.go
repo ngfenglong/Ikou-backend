@@ -155,7 +155,7 @@ func (m *DBModel) GetAllAreas() ([]*models.CodeDecodeArea, error) {
 
 	query := `
 				Select id, code, decode, isActive, created_at, updated_at
-    			From CodeDecodeArea
+    			From CodeDecodeAreas
 			`
 
 	rows, err := m.DB.QueryContext(ctx, query)

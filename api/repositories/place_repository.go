@@ -29,7 +29,7 @@ func (m *DBModel) GetAllPlaces(userID string) ([]*dto.PlaceDTO, error) {
 			Places p
 			Inner Join CodeDecodeSubcategories s on s.code = p.subCategoryCode
 			Inner Join CodeDecodeCategories c on c.code = s.categorycode
-			Inner Join CodeDecodeArea a on a.code = p.areaCode
+			Inner Join CodeDecodeAreas a on a.code = p.areaCode
 			Left Join Reviews r on p.id = r.place_id
 			Left Join Users u on u.id = r.created_by
 			LEFT JOIN liked_places lp on p.id = lp.placeId AND lp.userId = ? 
@@ -129,7 +129,7 @@ func (m *DBModel) GetPlaceById(id string, userID string) (*dto.PlaceDTO, error) 
 			Places p
 			Inner Join CodeDecodeSubcategories s on s.code = p.subCategoryCode
 			Inner Join CodeDecodeCategories c on c.code = s.categorycode
-			Inner Join CodeDecodeArea a on a.code = p.areaCode
+			Inner Join CodeDecodeAreas a on a.code = p.areaCode
 			LEFT JOIN liked_places lp on p.id = lp.placeId AND lp.userId = ? 
 		WHERE 
 			p.id = ?`, userID, id)
@@ -222,7 +222,7 @@ func (m *DBModel) GetPlacesByCategoryCode(category string, userID string) ([]*dt
 		FROM Places p
 		Inner Join CodeDecodeSubcategories s on s.code = p.subCategoryCode 
 		INNER JOIN CodeDecodeCategories c on c.code = s.categoryCode
-		Inner Join CodeDecodeArea a on a.code = p.areaCode
+		Inner Join CodeDecodeAreas a on a.code = p.areaCode
 		Left Join Reviews r on p.id = r.place_id
 		Left Join Users u on u.id = r.created_by
 		LEFT JOIN liked_places lp on p.id = lp.placeId AND lp.userId = ? 
@@ -325,7 +325,7 @@ func (m *DBModel) GetPlacesBySubCategoryCode(code int, userID string) ([]*dto.Pl
 		Places p
 		Inner Join CodeDecodeSubcategories s on s.code = p.subCategoryCode
 		Inner Join CodeDecodeCategories c on c.code = s.categorycode
-		Inner Join CodeDecodeArea a on a.code = p.areaCode
+		Inner Join CodeDecodeAreas a on a.code = p.areaCode
 		Left Join Reviews r on p.id = r.place_id
 		Left Join Users u on u.id = r.created_by
 		LEFT JOIN liked_places lp on p.id = lp.placeId AND lp.userId = ? 
@@ -429,7 +429,7 @@ func (m *DBModel) SearchPlaceByKeyword(keyword string, userID string) ([]*dto.Pl
 			Places p
 			Inner Join CodeDecodeSubcategories s on s.code = p.subCategoryCode
 			Inner Join CodeDecodeCategories c on c.code = s.categorycode
-			Inner Join CodeDecodeArea a on a.code = p.areaCode
+			Inner Join CodeDecodeAreas a on a.code = p.areaCode
 			Left Join Reviews r on p.id = r.place_id
 			Left Join Users u on u.id = r.created_by
 			LEFT JOIN liked_places lp on p.id = lp.placeId AND lp.userId = ? 
