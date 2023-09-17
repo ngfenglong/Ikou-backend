@@ -32,7 +32,7 @@ func (m *DBModel) GetAllPlaces(userID string) ([]*dto.PlaceDTO, error) {
 			Inner Join CodeDecodeAreas a on a.code = p.areaCode
 			Left Join Reviews r on p.id = r.place_id
 			Left Join Users u on u.id = r.created_by
-			LEFT JOIN liked_places lp on p.id = lp.placeId AND lp.userId = ? 
+			LEFT JOIN Liked_Places lp on p.id = lp.placeId AND lp.userId = ? 
 		ORDER BY p.id
 	`
 
@@ -130,7 +130,7 @@ func (m *DBModel) GetPlaceById(id string, userID string) (*dto.PlaceDTO, error) 
 			Inner Join CodeDecodeSubcategories s on s.code = p.subCategoryCode
 			Inner Join CodeDecodeCategories c on c.code = s.categorycode
 			Inner Join CodeDecodeAreas a on a.code = p.areaCode
-			LEFT JOIN liked_places lp on p.id = lp.placeId AND lp.userId = ? 
+			LEFT JOIN Liked_Places lp on p.id = lp.placeId AND lp.userId = ? 
 		WHERE 
 			p.id = ?`, userID, id)
 
@@ -225,7 +225,7 @@ func (m *DBModel) GetPlacesByCategoryCode(category string, userID string) ([]*dt
 		Inner Join CodeDecodeAreas a on a.code = p.areaCode
 		Left Join Reviews r on p.id = r.place_id
 		Left Join Users u on u.id = r.created_by
-		LEFT JOIN liked_places lp on p.id = lp.placeId AND lp.userId = ? 
+		LEFT JOIN Liked_Places lp on p.id = lp.placeId AND lp.userId = ? 
 		WHERE c.decode = ?
 		Order by p.id
 	`
@@ -328,7 +328,7 @@ func (m *DBModel) GetPlacesBySubCategoryCode(code int, userID string) ([]*dto.Pl
 		Inner Join CodeDecodeAreas a on a.code = p.areaCode
 		Left Join Reviews r on p.id = r.place_id
 		Left Join Users u on u.id = r.created_by
-		LEFT JOIN liked_places lp on p.id = lp.placeId AND lp.userId = ? 
+		LEFT JOIN Liked_Places lp on p.id = lp.placeId AND lp.userId = ? 
 	WHERE subCategoryCode = ?
 	ORDER BY p.id
 	`
@@ -432,7 +432,7 @@ func (m *DBModel) SearchPlaceByKeyword(keyword string, userID string) ([]*dto.Pl
 			Inner Join CodeDecodeAreas a on a.code = p.areaCode
 			Left Join Reviews r on p.id = r.place_id
 			Left Join Users u on u.id = r.created_by
-			LEFT JOIN liked_places lp on p.id = lp.placeId AND lp.userId = ? 
+			LEFT JOIN Liked_Places lp on p.id = lp.placeId AND lp.userId = ? 
 		WHERE p.address like ? OR p.placename like ?
 	`
 
@@ -537,7 +537,7 @@ func (m *DBModel) HasUserLikedPlace(userID string, placeID string) (bool, error)
 
 	checkLikedStmt := `
 		Select Count(*) 
-		From liked_places 
+		From Liked_Places 
 		WHERE userId = ? AND placeId = ?  
 	`
 
@@ -560,7 +560,7 @@ func (m *DBModel) RemoveUserLikeFromPlace(userID string, placeID string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	stmt := `Delete From liked_places WHERE userId = ? AND placeId = ?`
+	stmt := `Delete From Liked_Places WHERE userId = ? AND placeId = ?`
 
 	_, err := m.DB.ExecContext(ctx, stmt, userID, placeID)
 	if err != nil {
@@ -574,7 +574,7 @@ func (m *DBModel) AddUserLikeToPlace(userID string, placeID string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	stmt := `INSERT into liked_places (userId, placeId, created_by) VALUES (?,?,?)`
+	stmt := `INSERT into Liked_Places (userId, placeId, created_by) VALUES (?,?,?)`
 
 	_, err := m.DB.ExecContext(ctx, stmt, userID, placeID, userID)
 	if err != nil {
