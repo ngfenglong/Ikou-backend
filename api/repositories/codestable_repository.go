@@ -17,7 +17,7 @@ func (m *DBModel) GetAllCategory() ([]*models.CodeDecodeCategory, error) {
 		Select c.id, c.code, c.decode, c.isActive, c.created_at, c.updated_at, 
 		s.id, s.code, s.decode,s.isActive, s.created_at, s.updated_at  
 		FROM CodeDecodeCategories c
-		INNER JOIN CodeDecodeSubCategories s ON c.code = s.categoryCode
+		INNER JOIN CodeDecodeSubcategories s ON c.code = s.categoryCode
 		WHERE c.isActive = 1 AND s.isActive = 1
 	`
 	rows, err := m.DB.QueryContext(ctx, query)
