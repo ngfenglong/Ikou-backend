@@ -58,4 +58,4 @@ internal
 This project is currently in its infancy. Contributions, ideas, and bug reports are very welcome! Feel free to check the issues or create a new one.
 
 ## Contact 📬
-[Your Contact Information Here]
+For any inquiries or clarifications related to this project, please contact [zell_dev@hotmail.com](mailto:zell_dev@hotmail.com).
