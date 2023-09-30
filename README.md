@@ -5,16 +5,19 @@ This repository contains the API for the [Ikou](https://ikou-web.netlify.app/) p
 > 🚨 This is an ongoing project and subject to significant changes. Detailed documentation will be provided as the project matures.
 
 ## Table of Contents
+- [Technology Stack](#technology-stack)
 - [Getting Started](#getting-started)
 - [Usage](#usage)
 - [Project Structure](#project-structure)
-- [Technology Stack](#technology-stack)
 - [Contribution](#contribution)
-- [License](#license)
 - [Contact](#contact)
 
+## Technology Stack 💻
+- **Language:** Go
+- **Database:** MySQL (AWS RDS)
+- **Containerization:** Docker
+
 ## Getting Started
-### 1. Clone the Repository|
 1. Clone the repository.
 2. Navigate to the project directory and update the app.env file with your appropriate database details for local development.
 4. Run the project using Makefile:
@@ -49,13 +52,9 @@ internal
 
 > **Note:** The `data-seeding` and `dist` directories are not included in this repository as they are gitignored.
 
-## Technology Stack 💻
-- **Language:** Go
-- **Database:** MySQL (AWS RDS)
-- **Containerization:** Docker
 
 ## Contribution 🤝
-This project is currently in its infancy. Contributions, ideas, and bug reports are very welcome! Feel free to check the issues or create a new one.
+This project is currently in its infancy. Contributions, ideas, and bug reports are very welcome!
 
 ## Contact 📬
 For any inquiries or clarifications related to this project, please contact [zell_dev@hotmail.com](mailto:zell_dev@hotmail.com).
