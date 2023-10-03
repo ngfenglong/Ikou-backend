@@ -1,6 +1,6 @@
 # Ikou API 🌐
 
-This repository contains the API for the [Ikou](https://ikou-web.netlify.app/) project, a community-driven travel app allowing users to explore, plan, and share their travels. It's structured to provide support for the Ikou website frontend, serving as its backend counterpart. 
+This repository contains the API for the [Ikou](https://ikou-web.netlify.app/) project, a community-driven travel app, designed to make trip organizing with friends and peers a breeze, providing recommendations and allowing users to explore and refer back to places, activities, and trips created by others in the community. It's structured to provide support for the Ikou website frontend, serving as its backend counterpart. 
 
 > 🚨 This is an ongoing project and subject to significant changes. Detailed documentation will be provided as the project matures.
 
