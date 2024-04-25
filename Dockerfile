@@ -30,10 +30,10 @@ RUN mkdir -p /app/dist
 RUN CGO_ENABLED=0 GOOS=linux go build -v -o ./dist/api ./cmd
 
 # Expose port 5000 to the outside world
-EXPOSE 5000
+EXPOSE 9001
 
 # Command to run the application if you are connecting to sql from the same docker network 
-CMD ["./wait-for-it.sh", "db:3306", "--", "./dist/api"]
+# CMD ["./wait-for-it.sh", "db:3306", "--", "./dist/api"]
 
 # Command to run the application if you are connecting to sql from local machine 
-# CMD ["./dist/api"]
+CMD ["./dist/api"]

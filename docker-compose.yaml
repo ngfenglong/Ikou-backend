@@ -5,19 +5,20 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - 5000:5000
+
+      - 9001:9001
     env_file:
       - app.env
-    depends_on:
-      - db
-  db:
-    image: mysql:latest
-    command: --default-authentication-plugin=mysql_native_password
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: password
-      MYSQL_DATABASE: ikou
-    ports:
-      - 3307:3306
-    volumes:
-      - /mnt/c/ProgramData/MySQL/MySQL Server 8.0/Data:/var/lib/mysql
+    # depends_on:
+      # - db
+  # db:
+  #   image: mysql:latest
+  #   command: --default-authentication-plugin=mysql_native_password
+  #   restart: always
+  #   environment:
+  #     MYSQL_ROOT_PASSWORD: password
+  #     MYSQL_DATABASE: ikou
+  #   ports:
+  #     - 3307:3306
+  #   volumes:
+  #     - /mnt/c/ProgramData/MySQL/MySQL Server 8.0/Data:/var/lib/mysql
