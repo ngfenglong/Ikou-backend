@@ -1,0 +1,31 @@
+name: Deploy to Prod
+on:
+  push:
+    branches:
+      - releases/production
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Deploy to Prod
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            if [ $(docker ps -a -q -f name=ikou-backend-app | wc -l) -gt 0 ]; then
+              echo "Container exists, stopping and removing..."
+              docker stop ttm-bot-app
+            else
+              echo "Container does not exist, no need to stop or remove."
+            fi
+            cd projects/Ikou-backend/
+            git pull
+            docker rmi ikou-backend
+            docker build -t ikou-backend .
+            docker run -p 9001:9001 --rm -d --name ikou-backend-app ikou-backend
