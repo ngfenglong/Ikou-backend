@@ -20,7 +20,7 @@ jobs:
           script: |
             if [ $(sudo docker ps -a -q -f name=ikou-backend-app | wc -l) -gt 0 ]; then
               echo "Container exists, stopping and removing..."
-              sudo docker stop ttm-bot-app
+              sudo docker stop ikou-backend-app
             else
               echo "Container does not exist, no need to stop or remove."
             fi
