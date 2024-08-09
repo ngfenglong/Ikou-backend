@@ -40,7 +40,7 @@ func (pc *PlaceController) GetAllPlaces(w http.ResponseWriter, r *http.Request) 
 	}
 }
 
-// Get place with details such as comments, liked, etc...
+// Get place with details such as comments, liked, etc....
 func (pc *PlaceController) GetPlaceById(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	userID := r.Context().Value(middleware.UserIDKey).(string)
