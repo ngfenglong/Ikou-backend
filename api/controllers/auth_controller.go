@@ -163,7 +163,7 @@ func (ac *AuthController) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Todo: Add Validation Handling
+	// Todo: Add  Validation Handling
 	usernameExists, emailExists, err := ac.store.DB.CheckIfUserExists(rfi)
 	if err != nil {
 		helper.BadRequest(w, r, err)
