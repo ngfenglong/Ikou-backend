@@ -1,7 +1,0 @@
-{
-  "database": "dolt",
-  "backend": "dolt",
-  "dolt_mode": "server",
-  "dolt_database": "ikou_backend",
-  "project_id": "8bfc8c0d-1b42-46b7-b841-9afa5c35096e"
-}
