@@ -14,3 +14,7 @@ profile.out
 /dist/
 
 *.env
+
+# Dolt database files (added by bd init)
+.dolt/
+*.db
