@@ -22,6 +22,7 @@ Code layout — repository interface, `MockDB` contract, dto/model/mapper, auth,
 - **One feature, one commit.** Keep each commit to a single objective so a reviewer reads it in one pass. Unrelated changes get their own commit — never bundle them in.
 - **State the verification result** in the commit message: what was checked, what happened, in plain language — not raw tool output.
 - **One branch per PR**, off `master`.
+- **Sync with master before raising a PR to it.** `git fetch origin` then `git merge origin/master` into the feature branch, resolve anything that surfaces, and re-run `make check` before opening the PR. Never raise a PR from a branch that has not seen the current master.
 - **Verify before raising.** Run `make check`, then read back the implementation and confirm the commit stands alone as working code.
 
 ## Safety (non-negotiable)
