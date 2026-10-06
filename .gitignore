@@ -16,3 +16,4 @@ profile.out
 *.env
 
 .idea/
+coverage.out
