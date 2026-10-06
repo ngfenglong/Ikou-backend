@@ -10,27 +10,27 @@ import (
 // MockDB is a test double for repository.Repository. Set each Func field to
 // control the return value for that method in a given test.
 type MockDB struct {
-	GetUserByIDFunc                    func(userID string) (*models.User, error)
-	GetUserByUsernameFunc              func(username string) (*models.User, error)
-	InsertTokenFunc                    func(userId string, refreshToken string, expiresAt time.Time) error
-	RegisterUserFunc                   func(r dto.RegisterFormInputDTO) error
-	CheckIfUserExistsFunc              func(r dto.RegisterFormInputDTO) (bool, bool, error)
-	DeleteTokenFunc                    func(refreshToken string) error
-	FetchRefreshTokenFromDBFunc        func(tokenStr string, userID string) (*models.RefreshToken, bool)
-	GetAllPlacesFunc                   func(userID string) ([]*dto.PlaceDTO, error)
-	GetPlaceByIdFunc                   func(id string, userID string) (*dto.PlaceDTO, error)
-	GetPlacesByCategoryCodeFunc        func(category string, userID string) ([]*dto.PlaceDTO, error)
-	GetPlacesBySubCategoryCodeFunc     func(code int, userID string) ([]*dto.PlaceDTO, error)
-	SearchPlaceByKeywordFunc           func(keyword string, userID string) ([]*dto.PlaceDTO, error)
-	AddPlaceRequestFunc                func(pr dto.PlaceRequestDto) error
-	HasUserLikedPlaceFunc              func(userID string, placeID string) (bool, error)
-	RemoveUserLikeFromPlaceFunc        func(userID string, placeID string) error
-	AddUserLikeToPlaceFunc             func(userID string, placeID string) error
-	GetAllCategoryFunc                 func() ([]*models.CodeDecodeCategory, error)
-	GetAllSubCategoryFunc              func() ([]*models.CodeDecodeSubCategory, error)
+	GetUserByIDFunc                     func(userID string) (*models.User, error)
+	GetUserByUsernameFunc               func(username string) (*models.User, error)
+	InsertTokenFunc                     func(userId string, refreshToken string, expiresAt time.Time) error
+	RegisterUserFunc                    func(r dto.RegisterFormInputDTO) error
+	CheckIfUserExistsFunc               func(r dto.RegisterFormInputDTO) (bool, bool, error)
+	DeleteTokenFunc                     func(refreshToken string) error
+	FetchRefreshTokenFromDBFunc         func(tokenStr string, userID string) (*models.RefreshToken, bool)
+	GetAllPlacesFunc                    func(userID string) ([]*dto.PlaceDTO, error)
+	GetPlaceByIdFunc                    func(id string, userID string) (*dto.PlaceDTO, error)
+	GetPlacesByCategoryCodeFunc         func(category string, userID string) ([]*dto.PlaceDTO, error)
+	GetPlacesBySubCategoryCodeFunc      func(code int, userID string) ([]*dto.PlaceDTO, error)
+	SearchPlaceByKeywordFunc            func(keyword string, userID string) ([]*dto.PlaceDTO, error)
+	AddPlaceRequestFunc                 func(pr dto.PlaceRequestDto) error
+	HasUserLikedPlaceFunc               func(userID string, placeID string) (bool, error)
+	RemoveUserLikeFromPlaceFunc         func(userID string, placeID string) error
+	AddUserLikeToPlaceFunc              func(userID string, placeID string) error
+	GetAllCategoryFunc                  func() ([]*models.CodeDecodeCategory, error)
+	GetAllSubCategoryFunc               func() ([]*models.CodeDecodeSubCategory, error)
 	GetAllSubCategoryByCategoryCodeFunc func(categoryCode int) ([]*models.CodeDecodeSubCategory, error)
-	GetAllAreasFunc                    func() ([]*models.CodeDecodeArea, error)
-	GetActivityByPlaceFunc             func(placeId string) ([]*models.Activity, error)
+	GetAllAreasFunc                     func() ([]*models.CodeDecodeArea, error)
+	GetActivityByPlaceFunc              func(placeId string) ([]*models.Activity, error)
 }
 
 func (m *MockDB) GetUserByID(userID string) (*models.User, error) {

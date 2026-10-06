@@ -38,8 +38,8 @@ type RegisterFormInputDTO struct {
 }
 
 type RefreshTokenResponseDTO struct {
-	Error        bool      `json:"error"`
-	Message      string    `json:"message"`
-	AccessToken  string    `json:"access_token"`
-	Expiry       time.Time `json:"expiry"`
+	Error       bool      `json:"error"`
+	Message     string    `json:"message"`
+	AccessToken string    `json:"access_token"`
+	Expiry      time.Time `json:"expiry"`
 }
