@@ -18,7 +18,7 @@ func (m *DBModel) GetActivityByPlace(placeId string) ([]*models.Activity, error)
 		FROM Activities a 
 		INNER JOIN Place p ON p.id = a.placeId
 		Inner join CodeDecodeSubcategories s on s.code = p.subCategoryCode
-		WHERE placeId = ? 
+		WHERE placeId = $1 
 	`
 	rows, err := m.DB.QueryContext(ctx, query)
 	if err != nil {

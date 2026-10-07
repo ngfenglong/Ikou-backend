@@ -116,7 +116,7 @@ func (m *DBModel) GetAllSubCategoryByCategoryCode(categoryCode int) ([]*models.C
 		Select id, code, decode, isActive, categoryCode, created_at, updated_at 
 		FROM CodeDecodeSubcategories 
 		WHERE isActive = 1 
-		AND categoryCode = ?
+		AND categoryCode = $1
 	`
 	rows, err := m.DB.QueryContext(ctx, query, categoryCode)
 	if err != nil {

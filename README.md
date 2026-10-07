@@ -14,7 +14,7 @@ This repository contains the API for the [Ikou](https://ikou-web.netlify.app/) p
 
 ## Technology Stack 💻
 - **Language:** Go
-- **Database:** MySQL (AWS RDS)
+- **Database:** PostgreSQL ([Neon](https://neon.tech/))
 - **Containerization:** Docker
 
 ## Getting Started
