@@ -14,3 +14,6 @@ profile.out
 /dist/
 
 *.env
+
+.idea/
+coverage.out

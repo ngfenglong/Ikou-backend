@@ -7,7 +7,7 @@ import (
 
 type Store struct {
 	Config config.Config
-	DB     repository.DBModel
+	DB     repository.Repository
 }
 
 func NewStore(cfg config.Config) (*Store, error) {
@@ -18,7 +18,7 @@ func NewStore(cfg config.Config) (*Store, error) {
 
 	store := &Store{
 		Config: cfg,
-		DB:     *db,
+		DB:     db,
 	}
 
 	return store, nil

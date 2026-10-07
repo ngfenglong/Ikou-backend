@@ -16,7 +16,7 @@ func (m *DBModel) GetUserByID(userID string) (*models.User, error) {
 	row := m.DB.QueryRowContext(ctx, `
 		SELECT id, username, email, password, firstname, lastname, country, profileImage
 		FROM Users
-		WHERE id = ?
+		WHERE id = $1
 	`, userID)
 
 	err := row.Scan(
@@ -45,7 +45,7 @@ func (m *DBModel) GetUserByUsername(username string) (*models.User, error) {
 	row := m.DB.QueryRowContext(ctx, `
 		SELECT id, username, email, password, firstname, lastname, country, profileImage
 		FROM Users
-		WHERE username = ?
+		WHERE username = $1
 	`, username)
 
 	err := row.Scan(
@@ -71,14 +71,14 @@ func (m *DBModel) InsertToken(userId string, refreshToken string, expiresAt time
 	defer cancel()
 
 	// delete existing tokens
-	stmt := `Delete from RefreshTokens where userId = ? and expires_at < ?`
+	stmt := `Delete from RefreshTokens where userId = $1 and expires_at < $2`
 	_, err := m.DB.ExecContext(ctx, stmt, userId, time.Now())
 	if err != nil {
 		return err
 	}
 
 	stmt = `INSERT into RefreshTokens (userId, token, expires_at, created_at, updated_at) 
-		values (?, ?, ?, ?, ?)
+		values ($1, $2, $3, $4, $5)
 	`
 
 	_, err = m.DB.ExecContext(ctx, stmt, userId, refreshToken, expiresAt, time.Now(), time.Now())
@@ -96,7 +96,7 @@ func (m *DBModel) RegisterUser(r dto.RegisterFormInputDTO) error {
 
 	stmt := `
 		Insert into Users (username, firstname, lastname, email, country, profileImage, password) 
-		VALUE (?,?,?,?,?,?,?)
+		VALUES ($1,$2,$3,$4,$5,$6,$7)
 	`
 	_, err := m.DB.ExecContext(ctx, stmt, r.Username, r.FirstName, r.LastName, r.Email, r.Country, r.ProfileImage, r.Password)
 	if err != nil {
@@ -116,7 +116,7 @@ func (m *DBModel) CheckIfUserExists(r dto.RegisterFormInputDTO) (bool, bool, err
 		From 
 			Users 
 		WHERE
-			username = ?
+			username = $1
 	`
 
 	row := m.DB.QueryRowContext(ctx, checkUsernameStmt, r.Username)
@@ -136,7 +136,7 @@ func (m *DBModel) CheckIfUserExists(r dto.RegisterFormInputDTO) (bool, bool, err
 		From 
 			Users 
 		WHERE
-			email = ?
+			email = $1
 	`
 	row = m.DB.QueryRowContext(ctx, checkEmailStmt, r.Email)
 
@@ -155,7 +155,7 @@ func (m *DBModel) DeleteToken(refreshToken string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	stmt := `Delete from RefreshTokens where token = ?`
+	stmt := `Delete from RefreshTokens where token = $1`
 	_, err := m.DB.ExecContext(ctx, stmt, refreshToken)
 	if err != nil {
 		return err
@@ -173,8 +173,8 @@ func (m *DBModel) FetchRefreshTokenFromDB(tokenStr string, userID string) (*mode
 	stmt := `
 		Select id, userId, token, expires_at
 		FROM refreshtokens
-		WHERE token = ? 
-		AND userID = ?
+		WHERE token = $1 
+		AND userID = $2
 	`
 	row := m.DB.QueryRowContext(ctx, stmt, tokenStr, userID)
 

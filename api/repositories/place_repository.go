@@ -32,7 +32,7 @@ func (m *DBModel) GetAllPlaces(userID string) ([]*dto.PlaceDTO, error) {
 			Inner Join CodeDecodeAreas a on a.code = p.areaCode
 			Left Join Reviews r on p.id = r.place_id
 			Left Join Users u on u.id = r.created_by
-			LEFT JOIN Liked_Places lp on p.id = lp.placeId AND lp.userId = ? 
+			LEFT JOIN Liked_Places lp on p.id = lp.placeId AND lp.userId = $1 
 		ORDER BY p.id
 	`
 
@@ -130,9 +130,9 @@ func (m *DBModel) GetPlaceById(id string, userID string) (*dto.PlaceDTO, error) 
 			Inner Join CodeDecodeSubcategories s on s.code = p.subCategoryCode
 			Inner Join CodeDecodeCategories c on c.code = s.categorycode
 			Inner Join CodeDecodeAreas a on a.code = p.areaCode
-			LEFT JOIN Liked_Places lp on p.id = lp.placeId AND lp.userId = ? 
+			LEFT JOIN Liked_Places lp on p.id = lp.placeId AND lp.userId = $1 
 		WHERE 
-			p.id = ?`, userID, id)
+			p.id = $2`, userID, id)
 
 	err := row.Scan(
 		&place.ID,
@@ -168,7 +168,7 @@ func (m *DBModel) GetPlaceById(id string, userID string) (*dto.PlaceDTO, error) 
 		inner join 
 			Users u on u.id = r.created_by
 		where
-			place_id = ?
+			place_id = $1
 	`
 
 	rows, err := m.DB.QueryContext(ctx, query, id)
@@ -225,8 +225,8 @@ func (m *DBModel) GetPlacesByCategoryCode(category string, userID string) ([]*dt
 		Inner Join CodeDecodeAreas a on a.code = p.areaCode
 		Left Join Reviews r on p.id = r.place_id
 		Left Join Users u on u.id = r.created_by
-		LEFT JOIN Liked_Places lp on p.id = lp.placeId AND lp.userId = ? 
-		WHERE c.decode = ?
+		LEFT JOIN Liked_Places lp on p.id = lp.placeId AND lp.userId = $1 
+		WHERE c.decode = $2
 		Order by p.id
 	`
 
@@ -328,8 +328,8 @@ func (m *DBModel) GetPlacesBySubCategoryCode(code int, userID string) ([]*dto.Pl
 		Inner Join CodeDecodeAreas a on a.code = p.areaCode
 		Left Join Reviews r on p.id = r.place_id
 		Left Join Users u on u.id = r.created_by
-		LEFT JOIN Liked_Places lp on p.id = lp.placeId AND lp.userId = ? 
-	WHERE subCategoryCode = ?
+		LEFT JOIN Liked_Places lp on p.id = lp.placeId AND lp.userId = $1 
+	WHERE subCategoryCode = $2
 	ORDER BY p.id
 	`
 
@@ -432,8 +432,8 @@ func (m *DBModel) SearchPlaceByKeyword(keyword string, userID string) ([]*dto.Pl
 			Inner Join CodeDecodeAreas a on a.code = p.areaCode
 			Left Join Reviews r on p.id = r.place_id
 			Left Join Users u on u.id = r.created_by
-			LEFT JOIN Liked_Places lp on p.id = lp.placeId AND lp.userId = ? 
-		WHERE p.address like ? OR p.placename like ?
+			LEFT JOIN Liked_Places lp on p.id = lp.placeId AND lp.userId = $1 
+		WHERE p.address ILIKE $2 OR p.placename ILIKE $3
 	`
 
 	rows, err := m.DB.QueryContext(ctx, query, userID, addressKeyword, placenameKeyword)
@@ -520,7 +520,7 @@ func (m *DBModel) AddPlaceRequest(pr dto.PlaceRequestDto) error {
 
 	stmt := `
 		Insert into Place_Requests (placeName, description, address, imageUrl, subCategoryCode, areaCode, created_by) 
-		VALUE (?,?,?,?,?,?,?)
+		VALUES ($1,$2,$3,$4,$5,$6,$7)
 	`
 
 	_, err := m.DB.ExecContext(ctx, stmt, pr.Name, pr.Description, pr.Address, pr.ImageUrl, pr.SubCategory, pr.Area, pr.CreatedBy)
@@ -538,7 +538,7 @@ func (m *DBModel) HasUserLikedPlace(userID string, placeID string) (bool, error)
 	checkLikedStmt := `
 		Select Count(*) 
 		From Liked_Places 
-		WHERE userId = ? AND placeId = ?  
+		WHERE userId = $1 AND placeId = $2  
 	`
 
 	row := m.DB.QueryRowContext(ctx, checkLikedStmt, userID, placeID)
@@ -560,7 +560,7 @@ func (m *DBModel) RemoveUserLikeFromPlace(userID string, placeID string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	stmt := `Delete From Liked_Places WHERE userId = ? AND placeId = ?`
+	stmt := `Delete From Liked_Places WHERE userId = $1 AND placeId = $2`
 
 	_, err := m.DB.ExecContext(ctx, stmt, userID, placeID)
 	if err != nil {
@@ -574,7 +574,7 @@ func (m *DBModel) AddUserLikeToPlace(userID string, placeID string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	stmt := `INSERT into Liked_Places (userId, placeId, created_by) VALUES (?,?,?)`
+	stmt := `INSERT into Liked_Places (userId, placeId, created_by) VALUES ($1,$2,$3)`
 
 	_, err := m.DB.ExecContext(ctx, stmt, userID, placeID, userID)
 	if err != nil {

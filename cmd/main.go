@@ -9,7 +9,7 @@ import (
 	"github.com/ngfenglong/ikou-backend/api/config"
 	"github.com/ngfenglong/ikou-backend/api/store"
 
-	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/lib/pq"
 )
 
 const version = "1.0.0"
