@@ -4,6 +4,8 @@ This repository contains the API for the [Ikou](https://ikou-web.netlify.app/) p
 
 > 🚨 This is an ongoing project and subject to significant changes. Detailed documentation will be provided as the project matures.
 
+> 🤖 Starting from October 2026, this project is built primarily with AI coding agents, following the workflow in [CLAUDE.md](CLAUDE.md).
+
 ## Table of Contents
 - [Technology Stack](#technology-stack)
 - [Getting Started](#getting-started)
@@ -14,7 +16,7 @@ This repository contains the API for the [Ikou](https://ikou-web.netlify.app/) p
 
 ## Technology Stack 💻
 - **Language:** Go
-- **Database:** MySQL (AWS RDS)
+- **Database:** PostgreSQL ([Neon](https://neon.tech/))
 - **Containerization:** Docker
 
 ## Getting Started
